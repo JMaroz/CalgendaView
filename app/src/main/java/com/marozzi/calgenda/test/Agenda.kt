@@ -62,11 +62,6 @@ class AgendaDayHeaderHolderImp(itemView: View) : AgendaDayHeaderHolder(itemView)
 class AgendaEmptyEventHolderImp(itemView: View) : AgendaEmptyEventHolder(itemView)
 
 class AgendaEventHolderImp(itemView: View) : AgendaEventHolder(itemView) {
-    val tvStartTime: TextView = itemView.findViewById(R.id.oc_agenda_event_time_tip)
-    val tvDuration: TextView = itemView.findViewById(R.id.oc_agenda_event_duration)
-    val tvTitle: TextView = itemView.findViewById(R.id.oc_agenda_event_title)
-    val tvLocation: TextView = itemView.findViewById(R.id.oc_tv_location)
-    val topDivider: View = itemView.findViewById(R.id.oc_agenda_event_top_divider)
 }
 
 
