@@ -2,6 +2,7 @@ package com.marozzi.calgenda.test
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.marozzi.calgenda.model.Event
 import com.marozzi.calgenda.view.CalgendaView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
@@ -17,11 +18,12 @@ class MainActivity : AppCompatActivity() {
         }
 
         val startDate = Calendar.getInstance().apply {
-            add(Calendar.MONTH, -6)
+            add(Calendar.MONTH, -11)
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
         }.time
 
         val endDate = Calendar.getInstance().apply {
-            add(Calendar.MONTH, 2)
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
         }.time
 
         calgenda.initCalgenda(CalendarViewHandlerImp(),
@@ -29,12 +31,17 @@ class MainActivity : AppCompatActivity() {
             startDate,
             endDate,
             Calendar.MONDAY,
-            emptyList())
+            mockEvents())
 
         calgenda.calgendaListener = object : CalgendaView.OnCalgendaListener {
             override fun onMonthChange(newMonth: Date) {
                 toggle_calendar.text = newMonth.formatDate("MMMM yyyy").toUpperCase(Locale.getDefault())
             }
         }
+    }
+
+    private fun mockEvents() : List<Event> {
+
+        return emptyList()
     }
 }

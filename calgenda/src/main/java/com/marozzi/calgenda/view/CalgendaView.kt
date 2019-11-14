@@ -64,8 +64,8 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             override fun onDateChange(date: Date) {
-                calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
                 calendar_view.postDelayed({
+                    calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
                     calendar_view.scrollToDate(date)
                 }, 200)
             }

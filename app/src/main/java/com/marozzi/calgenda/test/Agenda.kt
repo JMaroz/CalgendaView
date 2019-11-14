@@ -31,11 +31,11 @@ class AgendaViewHandlerImp : AgendaViewHandler {
     override fun bindAgendaDayHeader(dayItem: AgendaDayItem, holder: AgendaDayHeaderHolder) {
         val viewHolder = holder as AgendaDayHeaderHolderImp
 
-        viewHolder.date.text = dayItem.date.formatDate("EEEE, dd MMMM yyyy")
+        viewHolder.date.text = dayItem.date.formatDate("EEE, dd MMM yyyy")
             .toUpperCase(Locale.getDefault())
 
         viewHolder.itemView.setOnClickListener {
-            Toast.makeText(it.context, dayItem.date.formatDate("EEEE, MMMM dd"), Toast.LENGTH_SHORT)
+            Toast.makeText(it.context, dayItem.date.formatDate("EEE, MMM dd"), Toast.LENGTH_SHORT)
                 .show()
         }
     }
