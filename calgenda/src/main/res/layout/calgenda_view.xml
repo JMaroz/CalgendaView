@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.marozzi.calgenda.view.WeekView
+        android:id="@+id/calendar_week_headbar_view"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"/>
+
+    <com.marozzi.calgenda.view.CalendarView
+        android:id="@+id/calendar_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:layout_height="200dp" />
+
+    <com.marozzi.calgenda.view.AgendaView
+        android:id="@+id/agenda_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</LinearLayout>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/toggle_calendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimary"
+        android:drawableEnd="@drawable/ic_arrow_down"
+        android:drawableTint="@color/colorAccent"
+        android:drawablePadding="8dp"
+        android:padding="16dp"
+        android:text="Toggle calendar"
+        android:textColor="@color/white" />
+
+    <com.marozzi.calgenda.view.CalgendaView
+        android:id="@+id/calgenda"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:cg_background_color="@color/colorPrimary"
+        app:cg_week_header_unselected_alpha=".6"
+        app:cg_week_header_text_size="5sp"
+        app:cg_week_header_background_color="@color/colorPrimary"
+        app:cg_week_header_weekdays_color="@color/white"
+        app:cg_week_header_weekend_color="@color/white" />
+
+</LinearLayout>
