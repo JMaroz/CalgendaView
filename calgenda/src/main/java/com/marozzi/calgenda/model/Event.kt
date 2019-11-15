@@ -7,6 +7,7 @@ import java.util.*
  */
 interface Event {
 
+    var id: String
     var date: Date
 
 }

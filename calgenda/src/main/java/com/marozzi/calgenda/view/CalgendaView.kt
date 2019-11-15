@@ -24,7 +24,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     /**
      * Map where for every day has a list of agenda items
      */
-    private var calgendaDataMap = TreeMap<String, MutableList<AgendaEventItem<Any>>>()
+    private var calgendaDataMap = TreeMap<String, MutableSet<AgendaEventItem>>()
 
     var calgendaListener: OnCalgendaListener? = null
 
@@ -98,12 +98,12 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         //init current week days
         val todayOfWeek = todayCalendar1.get(Calendar.DAY_OF_WEEK)
         for (i in todayOfWeek downTo startWeekDay) {
-            calgendaDataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableListOf()
+            calgendaDataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
             todayCalendar1.add(Calendar.DAY_OF_MONTH, -1)
         }
         todayCalendar2.add(Calendar.DAY_OF_MONTH, 1) //tomorrow
         for (i in todayOfWeek + 1..Calendar.SATURDAY + 1) {
-            calgendaDataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableListOf()
+            calgendaDataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
             todayCalendar2.add(Calendar.DAY_OF_MONTH, 1)
         }
 
@@ -114,7 +114,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
         val beforeSize = min
         for (i in 0 until beforeSize) {
-            calgendaDataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableListOf()
+            calgendaDataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
             todayCalendar1.add(Calendar.DAY_OF_MONTH, -1)
         }
 
@@ -125,7 +125,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
         val afterSize = max
         for (i in 0 until afterSize) {
-            calgendaDataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableListOf()
+            calgendaDataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
             todayCalendar2.add(Calendar.DAY_OF_MONTH, 1)
         }
 
@@ -152,13 +152,13 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     fun addEvents(events: List<Event>) {
         events.forEach {
             val date = it.date.formatDate(CALGENDA_DATE_FORMAT)
-            calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableListOf()).apply {
-                add(AgendaEventItem(it.date, it))
+            calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
+                add(AgendaEventItem(it))
             }
         }
 
         calgendaDataMap.values.forEach { it ->
-            it.sortBy { it.date }
+            it.sortedBy { it.date }
         }
 
         showCalgendaData()
@@ -194,7 +194,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             entry.key.getDate(CALGENDA_DATE_FORMAT)?.let {
                 val isToday = today.compare(it) == 0
                 val alternation = (it.get(Calendar.MONTH) - currentMonth) % 2 == 0
-                val item = CalendarItem(it, alternation, entry.value as List<AgendaEventItem<Any>>, isToday, isToday)
+                val item = CalendarItem(it, alternation, entry.value, isToday, isToday)
                 calendarDataList.add(item)
                 calendarDataList.sortBy { it.date }
                 calendarDateIndexMap[entry.key] = index

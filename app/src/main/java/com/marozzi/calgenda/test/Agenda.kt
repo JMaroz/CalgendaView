@@ -47,7 +47,7 @@ class AgendaViewHandlerImp : AgendaViewHandler {
         }
     }
 
-    override fun bindAgendaEvent(event: AgendaEventItem<*>, holder: AgendaEventHolder) {
+    override fun bindAgendaEvent(event: AgendaEventItem, holder: AgendaEventHolder) {
         val viewHolder = holder as AgendaEventHolderImp
         viewHolder.itemView.setOnClickListener {
             Toast.makeText(it.context, "Clicked on event", Toast.LENGTH_SHORT).show()

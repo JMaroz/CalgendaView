@@ -17,7 +17,7 @@ data class CalendarItem(
     /**
      * List of agenda event item set for the date
      */
-    var agendaEvents: List<AgendaEventItem<Any>> = emptyList(),
+    var agendaEvents: Set<AgendaEventItem> = emptySet(),
     /**
      * True if selected
      */

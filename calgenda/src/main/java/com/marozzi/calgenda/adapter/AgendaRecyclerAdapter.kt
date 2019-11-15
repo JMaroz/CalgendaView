@@ -40,7 +40,7 @@ class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerVie
         when (viewHolder) {
             is AgendaDayHeaderHolder -> agendaViewHandler!!.bindAgendaDayHeader(agendaItemList[position] as AgendaDayItem,
                 viewHolder)
-            is AgendaEventHolder -> agendaViewHandler!!.bindAgendaEvent(agendaItemList[position] as AgendaEventItem<*>,
+            is AgendaEventHolder -> agendaViewHandler!!.bindAgendaEvent(agendaItemList[position] as AgendaEventItem,
                 viewHolder)
             is AgendaEmptyEventHolder -> agendaViewHandler!!.bindAgendaEmptyEvent(agendaItemList[position] as AgendaEmptyEventItem,
                 viewHolder)

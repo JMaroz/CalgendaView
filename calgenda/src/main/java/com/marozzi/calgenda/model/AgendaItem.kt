@@ -28,7 +28,7 @@ data class AgendaEmptyEventItem(override var date: Date) : AgendaBaseItem {
     override var type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EMPTY_EVENT
 }
 
-data class AgendaEventItem<T>(override val date: Date, val data: T) : AgendaBaseItem {
+data class AgendaEventItem(val event: Event, override val date: Date = event.date) : AgendaBaseItem {
 
     override val type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT
 

@@ -25,7 +25,7 @@ interface AgendaViewHandler {
 
     fun bindAgendaEmptyEvent(emptyEvent: AgendaEmptyEventItem, holder: AgendaEmptyEventHolder)
 
-    fun bindAgendaEvent(event: AgendaEventItem<*>, holder: AgendaEventHolder)
+    fun bindAgendaEvent(event: AgendaEventItem, holder: AgendaEventHolder)
 
 }
 
