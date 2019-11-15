@@ -2,12 +2,12 @@
 <resources>
 
     <declare-styleable name="CalgendaView">
-        <attr name="cg_background_color" format="color" />
         <attr name="cg_week_header_background_color" format="color" />
         <attr name="cg_week_header_weekdays_color" format="color" />
         <attr name="cg_week_header_weekend_color" format="color" />
         <attr name="cg_week_header_text_size" format="dimension" />
         <attr name="cg_week_header_unselected_alpha" format="float" />
+        <attr name="cg_calendar_drag_to_open" format="boolean" />
     </declare-styleable>
 
 </resources>

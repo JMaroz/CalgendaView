@@ -63,6 +63,3 @@ class AgendaEmptyEventHolderImp(itemView: View) : AgendaEmptyEventHolder(itemVie
 
 class AgendaEventHolderImp(itemView: View) : AgendaEventHolder(itemView) {
 }
-
-
-

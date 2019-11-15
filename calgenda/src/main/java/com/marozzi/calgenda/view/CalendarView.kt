@@ -46,7 +46,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     /**
      * Set if a drag operation on the Calendar View opens the Grid or not. True to open, false otherwise
      */
-    var autoChangeStatus = false
+    var dragToOpen = false
 
     enum class CalendarViewStatus {
         EXPAND, COLLAPSE
@@ -67,7 +67,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                     super.onScrollStateChanged(recyclerView, newState)
                     when (newState) {
                         RecyclerView.SCROLL_STATE_DRAGGING -> {
-                            if (autoChangeStatus) changeStatus(CalendarViewStatus.EXPAND)
+                            if (dragToOpen) changeStatus(CalendarViewStatus.EXPAND)
                         }
                         RecyclerView.SCROLL_STATE_IDLE -> {
                             val fistPos = layoutManager.findFirstVisibleItemPosition()
@@ -94,7 +94,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                 }
             })
             it.setOnTouchListener { _, _ ->
-                if (status == CalendarViewStatus.EXPAND) false else !autoChangeStatus
+                if (status == CalendarViewStatus.EXPAND) false else !dragToOpen
             }
             PagerSnapWithSpanCountHelper(32).attachToRecyclerView(it)
         }

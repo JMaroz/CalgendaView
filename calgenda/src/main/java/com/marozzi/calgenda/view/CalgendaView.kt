@@ -5,6 +5,9 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.annotation.ColorInt
+import androidx.annotation.Dimension
+import androidx.annotation.FloatRange
 import com.marozzi.calgenda.R
 import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.adapter.CalendarViewHandler
@@ -16,10 +19,7 @@ import java.util.*
 /**
  * Created by amarozzi on 2019-11-04
  */
-class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(
-    context,
-    attrs,
-    defStyleAttr) {
+class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     /**
      * Map where for every day has a list of agenda items
@@ -33,25 +33,16 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         val a = context.obtainStyledAttributes(attrs, R.styleable.CalgendaView)
 
-        setBackgroundColor(a.getColor(R.styleable.CalgendaView_cg_background_color, Color.WHITE))
+        calendar_view.dragToOpen = a.getBoolean(R.styleable.CalgendaView_cg_calendar_drag_to_open, false)
 
-        val headerBackgroundColor = a.getColor(R.styleable.CalgendaView_cg_week_header_background_color,
-            Color.WHITE)
-        val headerWeekdaysColor = a.getColor(R.styleable.CalgendaView_cg_week_header_weekdays_color,
-            Color.LTGRAY)
-        val headerWeekendColor = a.getColor(R.styleable.CalgendaView_cg_week_header_weekend_color,
-            headerWeekdaysColor)
-        val headerTextSize = a.getDimensionPixelSize(R.styleable.CalgendaView_cg_week_header_text_size,
-            resources.getDimensionPixelSize(R.dimen.cg_week_header_text_size))
+        val headerBackgroundColor = a.getColor(R.styleable.CalgendaView_cg_week_header_background_color, Color.WHITE)
+        val headerWeekdaysColor = a.getColor(R.styleable.CalgendaView_cg_week_header_weekdays_color, Color.LTGRAY)
+        val headerWeekendColor = a.getColor(R.styleable.CalgendaView_cg_week_header_weekend_color, headerWeekdaysColor)
+        val headerTextSize = a.getDimensionPixelSize(R.styleable.CalgendaView_cg_week_header_text_size, resources.getDimensionPixelSize(R.dimen.cg_week_header_text_size))
         val headerUnSelectedAlpha = a.getFloat(R.styleable.CalgendaView_cg_week_header_unselected_alpha, 1f)
+        setHeaderCustomizations(headerBackgroundColor, headerWeekdaysColor, headerWeekendColor, headerTextSize, headerUnSelectedAlpha)
 
         a.recycle()
-
-        calendar_week_headbar_view.setCustomizations(headerBackgroundColor,
-            headerWeekdaysColor,
-            headerWeekendColor,
-            headerTextSize,
-            headerUnSelectedAlpha)
 
         agenda_view.listener = object : AgendaView.OnAgendaViewListener {
 
@@ -84,8 +75,11 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
     }
 
-    fun initCalgenda(calendarViewHandler: CalendarViewHandler, agendaViewHandler: AgendaViewHandler, startDate: Date, endDate: Date, startWeekDay: Int, events: List<Event>) {
+    fun setHeaderCustomizations(@ColorInt headerBackgroundColor: Int, @ColorInt headerWeekdaysColor: Int, @ColorInt headerWeekendColor: Int, @Dimension headerTextSize: Int, @FloatRange(from = 0.0, to = 1.0) headerUnSelectedAlpha: Float) {
+        calendar_week_headbar_view.setCustomizations(headerBackgroundColor, headerWeekdaysColor, headerWeekendColor, headerTextSize, headerUnSelectedAlpha)
+    }
 
+    fun initCalgenda(calendarViewHandler: CalendarViewHandler, agendaViewHandler: AgendaViewHandler, startDate: Date, endDate: Date, startWeekDay: Int, events: List<Event>) {
         calendar_week_headbar_view.initWeek(startWeekDay)
 
         calendar_view.setCalendarViewHandler(calendarViewHandler)
@@ -200,11 +194,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             entry.key.getDate(CALGENDA_DATE_FORMAT)?.let {
                 val isToday = today.compare(it) == 0
                 val alternation = (it.get(Calendar.MONTH) - currentMonth) % 2 == 0
-                val item = CalendarItem(it,
-                    alternation,
-                    entry.value as List<AgendaEventItem<Any>>,
-                    isToday,
-                    isToday)
+                val item = CalendarItem(it, alternation, entry.value as List<AgendaEventItem<Any>>, isToday, isToday)
                 calendarDataList.add(item)
                 calendarDataList.sortBy { it.date }
                 calendarDateIndexMap[entry.key] = index
