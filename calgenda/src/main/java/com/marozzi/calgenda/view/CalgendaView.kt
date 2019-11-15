@@ -150,10 +150,10 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     fun addEvents(events: List<Event>) {
-        events.forEach {
-            val date = it.date.formatDate(CALGENDA_DATE_FORMAT)
+        events.forEachIndexed { index, event ->
+            val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
             calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
-                add(AgendaEventItem(it))
+                add(AgendaEventItem(event, isFirst = index == 0, isLast = index == events.size - 1))
             }
         }
 
