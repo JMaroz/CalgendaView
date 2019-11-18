@@ -8,6 +8,7 @@ import com.marozzi.calgenda.model.Event
 import com.marozzi.calgenda.view.CalgendaView
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,26 +29,29 @@ class MainActivity : AppCompatActivity() {
             set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
         }.time
 
-        calgenda.initCalgenda(CalendarViewHandlerImp(), AgendaViewHandlerImp(), startDate, endDate, Calendar.MONDAY, mockEvents())
-
-        /*
-
-        app:cg_week_header_unselected_alpha=".6"
-        app:cg_week_header_text_size="5sp"
-        app:cg_week_header_background_color="@color/colorPrimary"
-        app:cg_week_header_weekdays_color="@color/white"
-        app:cg_week_header_weekend_color="@color/white"
-         */
-        calgenda.setHeaderCustomizations(ContextCompat.getColor(this, R.color.colorPrimary), Color.WHITE, Color.WHITE, resources.getDimensionPixelSize(R.dimen.dimen_5dp), .6f)
+        calgenda.initCalgenda(CalendarViewHandlerImp(), AgendaViewHandlerImp(), startDate, endDate, Calendar.MONDAY, emptyList())
         calgenda.calgendaListener = object : CalgendaView.OnCalgendaListener {
             override fun onMonthChange(newMonth: Date) {
                 toggle_calendar.text = newMonth.formatDate("MMMM yyyy").toUpperCase(Locale.getDefault())
             }
         }
+
+        calgenda.postDelayed({
+            calgenda.addEvents(mockEvents())
+        }, 1000)
     }
 
     private fun mockEvents(): List<Event> {
-
-        return emptyList()
+        val events = mutableListOf<MockEvent>()
+        val current = Calendar.getInstance().apply {
+            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
+        }
+        for (i in 0..100) {
+            current.add(Calendar.DAY_OF_MONTH, Random.nextInt(-1, 1))
+            events.add(MockEvent(UUID.randomUUID().toString(), current.time))
+        }
+        return events
     }
+
+    class MockEvent(override var id: String, override var date: Date) : Event
 }

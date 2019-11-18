@@ -24,6 +24,11 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimary"
-        app:cg_calendar_drag_to_open="false"/>
+        app:cg_calendar_drag_to_open="false"
+        app:cg_week_header_unselected_alpha=".6"
+        app:cg_week_header_text_size="5sp"
+        app:cg_week_header_background_color="@color/colorPrimary"
+        app:cg_week_header_weekdays_color="@color/white"
+        app:cg_week_header_weekend_color="@color/white"/>
 
 </LinearLayout>

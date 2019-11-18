@@ -12,6 +12,8 @@ import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.model.AgendaDayItem
 import com.marozzi.calgenda.model.AgendaEmptyEventItem
 import com.marozzi.calgenda.model.AgendaEventItem
+import kotlinx.android.synthetic.main.calgenda_item_date_header.view.*
+import kotlinx.android.synthetic.main.calgenda_item_event.view.*
 import java.util.*
 
 /**
@@ -49,6 +51,12 @@ class AgendaViewHandlerImp : AgendaViewHandler {
 
     override fun bindAgendaEvent(event: AgendaEventItem, holder: AgendaEventHolder) {
         val viewHolder = holder as AgendaEventHolderImp
+        if (event.isLast) {
+            viewHolder.divider.visibility = View.GONE
+        } else {
+            viewHolder.divider.visibility = View.VISIBLE
+        }
+        viewHolder.event.text = (event.event as MainActivity.MockEvent).id
         viewHolder.itemView.setOnClickListener {
             Toast.makeText(it.context, "Clicked on event", Toast.LENGTH_SHORT).show()
         }
@@ -56,10 +64,13 @@ class AgendaViewHandlerImp : AgendaViewHandler {
 }
 
 class AgendaDayHeaderHolderImp(itemView: View) : AgendaDayHeaderHolder(itemView) {
-    val date: TextView = itemView.findViewById(R.id.date)
+    val date: TextView = itemView.date
 }
 
 class AgendaEmptyEventHolderImp(itemView: View) : AgendaEmptyEventHolder(itemView)
 
 class AgendaEventHolderImp(itemView: View) : AgendaEventHolder(itemView) {
+
+    val event : TextView = itemView.event
+    val divider : View = itemView.divider
 }

@@ -27,6 +27,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private var calgendaDataMap = TreeMap<String, MutableSet<AgendaEventItem>>()
 
     var calgendaListener: OnCalgendaListener? = null
+    private var currentDate: Date? = null
 
     init {
         addView(LayoutInflater.from(context).inflate(R.layout.calgenda_view, this, false))
@@ -55,6 +56,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             override fun onDateChange(date: Date) {
+                currentDate = date
                 calendar_view.postDelayed({
                     calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
                     calendar_view.scrollToDate(date)
@@ -70,6 +72,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             override fun onCalendarItemSelected(calendarItem: CalendarItem) {
+                currentDate = calendarItem.date
                 agenda_view.moveToDate(calendarItem.date)
             }
         }
@@ -134,6 +137,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         val today = Calendar.getInstance().time
         agenda_view.moveToDate(today)
         calendar_view.scrollToDate(today)
+        calendar_week_headbar_view.setCurrentSelectedDay(today.get(Calendar.DAY_OF_WEEK))
     }
 
     fun toggleCalendar() {
@@ -162,6 +166,12 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         }
 
         showCalgendaData()
+
+        currentDate?.let {
+            agenda_view.moveToDate(it)
+            calendar_view.scrollToDate(it)
+            calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
+        }
     }
 
     private fun showCalgendaData() {
