@@ -53,6 +53,7 @@ class CalendarGridViewAdapter(context: Context,
 
     fun setItems(calendarItemList: List<CalendarItem>) {
         this.items = calendarItemList
+        notifyDataSetChanged()
     }
 
     fun setItemSelected(position: Int) {

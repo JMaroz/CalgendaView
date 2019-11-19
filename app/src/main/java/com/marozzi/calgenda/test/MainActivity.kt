@@ -1,9 +1,7 @@
 package com.marozzi.calgenda.test
 
-import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import com.marozzi.calgenda.model.Event
 import com.marozzi.calgenda.view.CalgendaView
 import kotlinx.android.synthetic.main.activity_main.*
@@ -33,17 +31,21 @@ class MainActivity : AppCompatActivity() {
         calgenda.calgendaListener = object : CalgendaView.OnCalgendaListener {
             override fun onMonthChange(newMonth: Date) {
                 toggle_calendar.text = newMonth.formatDate("MMMM yyyy").toUpperCase(Locale.getDefault())
+                calgenda.postDelayed({
+                    calgenda.addEvents(mockEvents(newMonth))
+                }, 1000)
             }
         }
 
-        calgenda.postDelayed({
-            calgenda.addEvents(mockEvents())
-        }, 1000)
+//        calgenda.postDelayed({
+//           calgenda.addEvents(mockEvents(Calendar.getInstance().time))
+//        }, 1000)
     }
 
-    private fun mockEvents(): List<Event> {
+    private fun mockEvents(date: Date): List<Event> {
         val events = mutableListOf<MockEvent>()
         val current = Calendar.getInstance().apply {
+            time = date
             set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
         }
         for (i in 0..100) {

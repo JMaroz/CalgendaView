@@ -27,7 +27,14 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     private var calgendaDataMap = TreeMap<String, MutableSet<AgendaEventItem>>()
 
     var calgendaListener: OnCalgendaListener? = null
-    private var currentDate: Date? = null
+
+    var currentDate: Date? = null
+        private set
+
+    /**
+     * If the user change the month by hand we will not move to the current date if events changes
+     */
+    private var changedByHand = false
 
     init {
         addView(LayoutInflater.from(context).inflate(R.layout.calgenda_view, this, false))
@@ -48,6 +55,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         agenda_view.listener = object : AgendaView.OnAgendaViewListener {
 
             override fun onMonthChange(date: Date) {
+                changedByHand = false
                 calgendaListener?.onMonthChange(date)
             }
 
@@ -67,6 +75,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         calendar_view.listener = object : CalendarView.OnCalendarViewListener {
 
             override fun onMonthChange(date: Date) {
+                changedByHand = true
                 calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
                 calgendaListener?.onMonthChange(date)
             }
@@ -134,10 +143,10 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         setEvents(events)
 
-        val today = Calendar.getInstance().time
-        agenda_view.moveToDate(today)
-        calendar_view.scrollToDate(today)
-        calendar_week_headbar_view.setCurrentSelectedDay(today.get(Calendar.DAY_OF_WEEK))
+        currentDate = Calendar.getInstance().time
+        agenda_view.moveToDate(currentDate!!)
+        calendar_view.scrollToDate(currentDate!!)
+        calendar_week_headbar_view.setCurrentSelectedDay(currentDate!!.get(Calendar.DAY_OF_WEEK))
     }
 
     fun toggleCalendar() {
@@ -167,10 +176,12 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         showCalgendaData()
 
-        currentDate?.let {
-            agenda_view.moveToDate(it)
-            calendar_view.scrollToDate(it)
-            calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
+        if (!changedByHand) {
+            currentDate?.let {
+                agenda_view.moveToDate(it)
+                calendar_view.scrollToDate(it)
+                calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
+            }
         }
     }
 

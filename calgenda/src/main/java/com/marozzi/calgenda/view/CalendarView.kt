@@ -37,7 +37,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     private val calendarMinHeight: Int = cellItemHeight * calendarMinRow
     private val calendarMaxHeight: Int = cellItemHeight * calendarMaxRow
 
-    private var currentMoth: String = ""
+    private var currentMonth: String = ""
     private var calendarDateIndexMap: TreeMap<String, Int> = TreeMap()
 
     var status = CalendarViewStatus.COLLAPSE
@@ -84,8 +84,8 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                             monthMap.entries.forEach {
                                 if (it.value > monthMajor.value) monthMajor = it
                             }
-                            if (currentMoth != monthMajor.key) {
-                                currentMoth = monthMajor.key
+                            if (currentMonth != monthMajor.key) {
+                                currentMonth = monthMajor.key
                                 listener?.onMonthChange(monthMajor.key.getDate(
                                     CALGENDA_DATE_FORMAT_MONTH)!!)
                             }
@@ -141,6 +141,8 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     fun scrollToDate(date: Date) {
         scrollToDateByPosition(calendarDateIndexMap[date.formatDate(CALGENDA_DATE_FORMAT)] ?: 0)
     }
+
+    fun getFirstCalendarItemVisible() : CalendarItem? = adapter.getItem(layoutManager.findFirstVisibleItemPosition())
 
     interface OnCalendarViewListener {
         /**
