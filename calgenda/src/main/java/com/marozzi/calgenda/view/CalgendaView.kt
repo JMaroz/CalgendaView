@@ -15,6 +15,7 @@ import com.marozzi.calgenda.model.*
 import com.marozzi.calgenda.util.*
 import kotlinx.android.synthetic.main.calgenda_view.view.*
 import java.util.*
+import kotlin.Comparator
 
 /**
  * Created by amarozzi on 2019-11-04
@@ -163,15 +164,18 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     fun addEvents(events: List<Event>) {
-        events.forEachIndexed { index, event ->
+        events.forEach { event ->
             val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
             calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
-                add(AgendaEventItem(event, isFirst = index == 0, isLast = index == events.size - 1))
+                add(AgendaEventItem(event, isFirst = false, isLast = false))
             }
         }
 
-        calgendaDataMap.values.forEach { it ->
-            it.sortedBy { it.date }
+        calgendaDataMap.values.forEach {
+            it.forEachIndexed { index, agendaEventItem ->
+                agendaEventItem.isFirst = index == 0
+                agendaEventItem.isLast = index == it.size - 1
+            }
         }
 
         showCalgendaData()
