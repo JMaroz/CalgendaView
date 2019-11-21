@@ -23,9 +23,7 @@ class MainActivity : AppCompatActivity() {
             set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
         }.time
 
-        val endDate = Calendar.getInstance().apply {
-            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
-        }.time
+        val endDate = Calendar.getInstance().time
 
         calgenda.initCalgenda(CalendarViewHandlerImp(), AgendaViewHandlerImp(), startDate, endDate, Calendar.MONDAY, emptyList())
         calgenda.calgendaListener = object : CalgendaView.OnCalgendaListener {
@@ -36,10 +34,6 @@ class MainActivity : AppCompatActivity() {
                 }, 1000)
             }
         }
-
-//        calgenda.postDelayed({
-//           calgenda.addEvents(mockEvents(Calendar.getInstance().time))
-//        }, 1000)
     }
 
     private fun mockEvents(date: Date): List<Event> {
