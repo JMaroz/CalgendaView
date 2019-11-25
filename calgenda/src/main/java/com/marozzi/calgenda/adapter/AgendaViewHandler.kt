@@ -13,11 +13,9 @@ import com.marozzi.calgenda.model.AgendaEventItem
  */
 interface AgendaViewHandler {
 
-    fun getAgendaDayHeaderHolder(layoutInflater: LayoutInflater,
-                                 parent: ViewGroup): AgendaDayHeaderHolder
+    fun getAgendaDayHeaderHolder(layoutInflater: LayoutInflater, parent: ViewGroup): AgendaDayHeaderHolder
 
-    fun getAgendaEmptyEventHolder(layoutInflater: LayoutInflater,
-                                  parent: ViewGroup): AgendaEmptyEventHolder
+    fun getAgendaEmptyEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): AgendaEmptyEventHolder
 
     fun getAgendaEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): AgendaEventHolder
 

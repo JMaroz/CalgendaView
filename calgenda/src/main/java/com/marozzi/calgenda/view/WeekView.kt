@@ -15,10 +15,7 @@ import java.util.*
 /**
  * Created by amarozzi on 2019-11-04
  */
-internal class WeekView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayout(
-    context,
-    attrs,
-    defStyleAttr) {
+internal class WeekView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : LinearLayout(context, attrs, defStyleAttr) {
 
     private var textSize = 11
     private var weekdaysColor = Color.LTGRAY
@@ -32,7 +29,7 @@ internal class WeekView @JvmOverloads constructor(context: Context, attrs: Attri
         initWeek(startDay)
     }
 
-    fun setCustomizations(@ColorInt backgroundColor: Int, @ColorInt weekdaysColor: Int, @ColorInt weekendColor: Int, textSize: Int, @FloatRange(from = 0.0, to = 1.0) unSelectedAlpha:Float) {
+    fun setCustomizations(@ColorInt backgroundColor: Int, @ColorInt weekdaysColor: Int, @ColorInt weekendColor: Int, textSize: Int, @FloatRange(from = 0.0, to = 1.0) unSelectedAlpha: Float) {
         setBackgroundColor(backgroundColor)
         this.unSelectedAlpha = unSelectedAlpha
         this.weekdaysColor = weekdaysColor
@@ -54,14 +51,11 @@ internal class WeekView @JvmOverloads constructor(context: Context, attrs: Attri
         for (i in 0 until 7) {
             val textView = TextView(context)
             textView.layoutParams = LayoutParams(0, ViewGroup.LayoutParams.MATCH_PARENT, 1f)
-            textView.text = calendar.getDisplayName(Calendar.DAY_OF_WEEK,
-                Calendar.SHORT,
-                Locale.getDefault())
+            textView.text = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault())
             textView.textSize = textSize.toFloat()
             textView.tag = calendar.get(Calendar.DAY_OF_WEEK)
 
-            val weekend = calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || calendar.get(
-                Calendar.DAY_OF_WEEK) == Calendar.SUNDAY
+            val weekend = calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SATURDAY || calendar.get(Calendar.DAY_OF_WEEK) == Calendar.SUNDAY
 
             textView.setTextColor(if (weekend) weekendColor else weekdaysColor)
 
@@ -73,7 +67,7 @@ internal class WeekView @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun setCurrentSelectedDay(day:Int) {
+    fun setCurrentSelectedDay(day: Int) {
         textViews.forEach {
             if ((it.tag as Int) == day) {
                 it.alpha = 1f

@@ -25,12 +25,8 @@ class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerVie
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         requireNotNull(agendaViewHandler) { "AgendaViewHandler is null" }
         return when (viewType) {
-            AgendaBaseItem.AGENDA_ITEM_TYPE_DAY -> agendaViewHandler!!.getAgendaDayHeaderHolder(
-                layoutInflater,
-                parent)
-            AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT -> agendaViewHandler!!.getAgendaEventHolder(
-                layoutInflater,
-                parent)
+            AgendaBaseItem.AGENDA_ITEM_TYPE_DAY -> agendaViewHandler!!.getAgendaDayHeaderHolder(layoutInflater, parent)
+            AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT -> agendaViewHandler!!.getAgendaEventHolder(layoutInflater, parent)
             else -> agendaViewHandler!!.getAgendaEmptyEventHolder(layoutInflater, parent)
         }
     }
@@ -38,12 +34,9 @@ class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerVie
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         requireNotNull(agendaViewHandler) { "AgendaViewHandler is null" }
         when (viewHolder) {
-            is AgendaDayHeaderHolder -> agendaViewHandler!!.bindAgendaDayHeader(agendaItemList[position] as AgendaDayItem,
-                viewHolder)
-            is AgendaEventHolder -> agendaViewHandler!!.bindAgendaEvent(agendaItemList[position] as AgendaEventItem,
-                viewHolder)
-            is AgendaEmptyEventHolder -> agendaViewHandler!!.bindAgendaEmptyEvent(agendaItemList[position] as AgendaEmptyEventItem,
-                viewHolder)
+            is AgendaDayHeaderHolder -> agendaViewHandler!!.bindAgendaDayHeader(agendaItemList[position] as AgendaDayItem, viewHolder)
+            is AgendaEventHolder -> agendaViewHandler!!.bindAgendaEvent(agendaItemList[position] as AgendaEventItem, viewHolder)
+            is AgendaEmptyEventHolder -> agendaViewHandler!!.bindAgendaEmptyEvent(agendaItemList[position] as AgendaEmptyEventItem, viewHolder)
         }
     }
 
@@ -57,15 +50,11 @@ class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerVie
     }
 
     /**
-     * simply update list
+     * update list
      */
     fun updateAgendaList(agendaItemList: List<AgendaBaseItem>) {
         this.agendaItemList = agendaItemList
         notifyDataSetChanged()
     }
 
-    fun onCalendarDataChange(agendaItemList: List<AgendaBaseItem>) {
-        this.agendaItemList = agendaItemList
-        notifyDataSetChanged() //just notify all data change
-    }
 }

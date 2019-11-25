@@ -18,10 +18,7 @@ import java.util.*
 /**
  * Created by amarozzi on 2019-11-08
  */
-internal class CalendarView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(
-    context,
-    attrs,
-    defStyleAttr) {
+internal class CalendarView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     var listener: OnCalendarViewListener? = null
 
@@ -86,8 +83,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                             }
                             if (currentMonth != monthMajor.key) {
                                 currentMonth = monthMajor.key
-                                listener?.onMonthChange(monthMajor.key.getDate(
-                                    CALGENDA_DATE_FORMAT_MONTH)!!)
+                                listener?.onMonthChange(monthMajor.key.getDate(CALGENDA_DATE_FORMAT_MONTH)!!)
                             }
                         }
                     }
@@ -142,7 +138,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
         scrollToDateByPosition(calendarDateIndexMap[date.formatDate(CALGENDA_DATE_FORMAT)] ?: 0)
     }
 
-    fun getFirstCalendarItemVisible() : CalendarItem? = adapter.getItem(layoutManager.findFirstVisibleItemPosition())
+    fun getFirstCalendarItemVisible(): CalendarItem? = adapter.getItem(layoutManager.findFirstVisibleItemPosition())
 
     interface OnCalendarViewListener {
         /**

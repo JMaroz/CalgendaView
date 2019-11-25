@@ -32,18 +32,14 @@ internal class PagerSnapWithSpanCountHelper : SnapHelper {
     override fun calculateDistanceToFinalSnap(layoutManager: RecyclerView.LayoutManager, targetView: View): IntArray? {
         val out = IntArray(2)
         if (layoutManager.canScrollHorizontally()) {
-            out[0] = if (mIsEnableCenter) distanceToCenter(layoutManager,
-                targetView,
-                getHorizontalHelper(layoutManager))
+            out[0] = if (mIsEnableCenter) distanceToCenter(layoutManager, targetView, getHorizontalHelper(layoutManager))
             else distanceToStart(targetView, getHorizontalHelper(layoutManager))
         } else {
             out[0] = 0
         }
 
         if (layoutManager.canScrollVertically()) {
-            out[1] = if (mIsEnableCenter) distanceToCenter(layoutManager,
-                targetView,
-                getVerticalHelper(layoutManager))
+            out[1] = if (mIsEnableCenter) distanceToCenter(layoutManager, targetView, getVerticalHelper(layoutManager))
             else distanceToStart(targetView, getVerticalHelper(layoutManager))
         } else {
             out[1] = 0
@@ -62,9 +58,7 @@ internal class PagerSnapWithSpanCountHelper : SnapHelper {
             }
 
             val child = layoutManager.findViewByPosition(firstChild)
-            return if (helper.getDecoratedEnd(child) >= helper.getDecoratedMeasurement(child) / 2 && helper.getDecoratedEnd(
-                    child) > 0
-            ) {
+            return if (helper.getDecoratedEnd(child) >= helper.getDecoratedMeasurement(child) / 2 && helper.getDecoratedEnd(child) > 0) {
 
                 child
             } else {
@@ -114,12 +108,10 @@ internal class PagerSnapWithSpanCountHelper : SnapHelper {
 
     override fun findSnapView(layoutManager: RecyclerView.LayoutManager): View? {
         if (layoutManager.canScrollVertically()) {
-            return if (mIsEnableCenter) findCenterView(layoutManager,
-                getVerticalHelper(layoutManager))
+            return if (mIsEnableCenter) findCenterView(layoutManager, getVerticalHelper(layoutManager))
             else findStartView(layoutManager, getVerticalHelper(layoutManager))
         } else if (layoutManager.canScrollHorizontally()) {
-            return if (mIsEnableCenter) findCenterView(layoutManager,
-                getHorizontalHelper(layoutManager))
+            return if (mIsEnableCenter) findCenterView(layoutManager, getHorizontalHelper(layoutManager))
             else findStartView(layoutManager, getHorizontalHelper(layoutManager))
         }
         return null
@@ -133,12 +125,10 @@ internal class PagerSnapWithSpanCountHelper : SnapHelper {
 
         var mStartMostChildView: View? = null
         if (layoutManager.canScrollVertically()) {
-            mStartMostChildView = if (mIsEnableCenter) findCenterView(layoutManager,
-                getVerticalHelper(layoutManager))
+            mStartMostChildView = if (mIsEnableCenter) findCenterView(layoutManager, getVerticalHelper(layoutManager))
             else findStartView(layoutManager, getVerticalHelper(layoutManager))
         } else if (layoutManager.canScrollHorizontally()) {
-            mStartMostChildView = if (mIsEnableCenter) findCenterView(layoutManager,
-                getHorizontalHelper(layoutManager))
+            mStartMostChildView = if (mIsEnableCenter) findCenterView(layoutManager, getHorizontalHelper(layoutManager))
             else findStartView(layoutManager, getHorizontalHelper(layoutManager))
         }
 
@@ -190,8 +180,7 @@ internal class PagerSnapWithSpanCountHelper : SnapHelper {
      * distance to center.
      * */
     private fun distanceToCenter(layoutManager: RecyclerView.LayoutManager, targetView: View, helper: OrientationHelper): Int {
-        val childCenter = helper.getDecoratedStart(targetView) + helper.getDecoratedMeasurement(
-            targetView) / 2
+        val childCenter = helper.getDecoratedStart(targetView) + helper.getDecoratedMeasurement(targetView) / 2
         val containerCenter: Int
         if (layoutManager.clipToPadding) {
             containerCenter = helper.startAfterPadding + helper.totalSpace / 2

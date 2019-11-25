@@ -10,8 +10,7 @@ import com.marozzi.calgenda.model.CalendarItem
 /**
  * @author by amarozzi on 2019-11-04
  */
-class CalendarGridViewAdapter(context: Context,
-                              var listener: ((item: CalendarItem) -> Unit)? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class CalendarGridViewAdapter(context: Context, var listener: ((item: CalendarItem) -> Unit)? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var cellItemSize = 0
 

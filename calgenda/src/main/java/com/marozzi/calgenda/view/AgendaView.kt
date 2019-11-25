@@ -22,10 +22,7 @@ import java.util.*
 /**
  * Created by amarozzi on 2019-11-08
  */
-class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null,
-                                           defStyleAttr: Int = 0) : FrameLayout(context,
-    attrs,
-    defStyleAttr) {
+class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     private val recyclerView = RecyclerView(context)
     private val adapter: AgendaRecyclerAdapter
@@ -42,12 +39,8 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private var currentMoth: String = ""
 
     init {
-        addView(recyclerView,
-            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT))
-        addView(header,
-            ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT))
+        addView(recyclerView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        addView(header, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
         recyclerView.let { it ->
             it.adapter = AgendaRecyclerAdapter(context).also {
@@ -96,8 +89,7 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         }
         if (item is AgendaDayItem) {
             if (!isAgendaScrollTriggerByCalendar) {
-                adapter.agendaViewHandler?.bindAgendaDayHeader(item,
-                    header.tag as AgendaDayHeaderHolder)
+                adapter.agendaViewHandler?.bindAgendaDayHeader(item, header.tag as AgendaDayHeaderHolder)
                 if (isScrollUp) { // when user scroll up, change agenda item scroll action again
                     moveToDate(item.date)
                 }
@@ -121,8 +113,7 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
 
     fun setAgendaViewHandler(agendaViewHandler: AgendaViewHandler) {
         adapter.agendaViewHandler = agendaViewHandler
-        val customHeader = agendaViewHandler.getAgendaDayHeaderHolder(LayoutInflater.from(context),
-            header)
+        val customHeader = agendaViewHandler.getAgendaDayHeaderHolder(LayoutInflater.from(context), header)
         header.tag = customHeader
         header.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -134,8 +125,7 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         header.addView(customHeader.itemView)
     }
 
-    fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>,
-                     agendaDataList: MutableList<AgendaBaseItem>) {
+    fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>, agendaDataList: MutableList<AgendaBaseItem>) {
         this.agendaDateIndexMap = agendaDateIndexMap
         adapter.updateAgendaList(agendaDataList)
     }
