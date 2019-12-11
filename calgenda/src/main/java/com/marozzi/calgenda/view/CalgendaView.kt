@@ -15,7 +15,6 @@ import com.marozzi.calgenda.model.*
 import com.marozzi.calgenda.util.*
 import kotlinx.android.synthetic.main.calgenda_view.view.*
 import java.util.*
-import kotlin.Comparator
 
 /**
  * Created by amarozzi on 2019-11-04
@@ -35,7 +34,9 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     /**
      * If the user change the month by hand we will not move to the current date if events changes
      */
-    private var changedByHand = false
+    private var changedByUserClick = false
+
+    private val obj = Any()
 
     init {
         addView(LayoutInflater.from(context).inflate(R.layout.calgenda_view, this, false))
@@ -56,7 +57,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         agenda_view.listener = object : AgendaView.OnAgendaViewListener {
 
             override fun onMonthChange(date: Date) {
-                changedByHand = false
+                changedByUserClick = false
                 calgendaListener?.onMonthChange(date)
             }
 
@@ -65,25 +66,29 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             override fun onDateChange(date: Date) {
-                currentDate = date
-                calendar_view.postDelayed({
-                    calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
-                    calendar_view.scrollToDate(date)
-                }, 200)
+                synchronized(obj) {
+                    currentDate = date
+                    calendar_view.postDelayed({
+                        calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
+                        calendar_view.scrollToDate(date)
+                    }, 200)
+                }
             }
         }
 
         calendar_view.listener = object : CalendarView.OnCalendarViewListener {
 
             override fun onMonthChange(date: Date) {
-                changedByHand = true
+                changedByUserClick = true
                 calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
                 calgendaListener?.onMonthChange(date)
             }
 
             override fun onCalendarItemSelected(calendarItem: CalendarItem) {
-                currentDate = calendarItem.date
-                agenda_view.moveToDate(calendarItem.date)
+                synchronized(obj) {
+                    currentDate = calendarItem.date
+                    agenda_view.moveToDate(calendarItem.date)
+                }
             }
         }
     }
@@ -160,31 +165,33 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     fun setEvents(events: List<Event>) {
         calgendaDataMap.values.forEach { it.clear() }
-        addEvents(events)
+        addEvents(events, false)
     }
 
-    fun addEvents(events: List<Event>) {
-        events.forEach { event ->
-            val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
-            calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
-                add(AgendaEventItem(event, isFirst = false, isLast = false))
+    fun addEvents(events: List<Event>, moveToCurrentDay: Boolean) {
+        synchronized(obj) {
+            events.forEach { event ->
+                val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
+                calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
+                    add(AgendaEventItem(event, isFirst = false, isLast = false))
+                }
             }
-        }
 
-        calgendaDataMap.values.forEach {
-            it.forEachIndexed { index, agendaEventItem ->
-                agendaEventItem.isFirst = index == 0
-                agendaEventItem.isLast = index == it.size - 1
+            calgendaDataMap.values.forEach {
+                it.forEachIndexed { index, agendaEventItem ->
+                    agendaEventItem.isFirst = index == 0
+                    agendaEventItem.isLast = index == it.size - 1
+                }
             }
-        }
 
-        showCalgendaData()
+            showCalgendaData()
 
-        if (!changedByHand) {
-            currentDate?.let {
-                agenda_view.moveToDate(it)
-                calendar_view.scrollToDate(it)
-                calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
+            if (!changedByUserClick && moveToCurrentDay) {
+                currentDate?.let {
+                    agenda_view.moveToDate(it)
+                    calendar_view.scrollToDate(it)
+                    calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
+                }
             }
         }
     }

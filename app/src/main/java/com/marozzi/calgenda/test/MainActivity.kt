@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
             override fun onMonthChange(newMonth: Date) {
                 toggle_calendar.text = newMonth.formatDate("MMMM yyyy").toUpperCase(Locale.getDefault())
                 calgenda.postDelayed({
-                    calgenda.addEvents(mockEvents(newMonth))
+                    calgenda.addEvents(mockEvents(newMonth), true)
                 }, 1000)
             }
         }
