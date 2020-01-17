@@ -208,18 +208,20 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     private fun showCalgendaData() {
-        val today = Calendar.getInstance().time
+        val calendar = Calendar.getInstance()
+        val currentMonth = calendar.get(Calendar.MONTH)
+        val today = calendar.time
 
         //construct agenda list data model
         val agendaDataList: MutableList<AgendaBaseItem> = mutableListOf()
         val agendaDateIndexMap: TreeMap<String, Int> = TreeMap()
-        var index = 0
+        var indexAgenda = 0
         calgendaDataMap.entries.forEach { entry ->
             entry.key.getDate(CALGENDA_DATE_FORMAT)?.let {
                 val item = AgendaDayItem(it, today.compare(it) == 0)
                 agendaDataList.add(item)
-                agendaDateIndexMap[entry.key] = index
-                index += if (entry.value.isEmpty()) { // put empty event item
+                agendaDateIndexMap[entry.key] = indexAgenda
+                indexAgenda += if (entry.value.isEmpty()) { // put empty event item
                     agendaDataList.add(AgendaEmptyEventItem(it))
                     2
                 } else {
@@ -231,8 +233,6 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         val calendarDataList: MutableList<CalendarItem> = mutableListOf()
         val calendarDateIndexMap: TreeMap<String, Int> = TreeMap()
-        val calendar = Calendar.getInstance()
-        val currentMonth = calendar.get(Calendar.MONTH)
         calgendaDataMap.entries.forEachIndexed { index, entry ->
             entry.key.getDate(CALGENDA_DATE_FORMAT)?.let {
                 val isToday = today.compare(it) == 0

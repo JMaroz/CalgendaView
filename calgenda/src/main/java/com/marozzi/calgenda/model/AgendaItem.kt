@@ -32,6 +32,22 @@ data class AgendaEventItem(val event: Event, override val date: Date = event.dat
 
     override val type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT
 
+    // leave equals and hasCode
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as AgendaEventItem
+
+        if (event != other.event) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return event.hashCode()
+    }
 }
 
 internal data class AgendaPageItem(val dayItem: AgendaDayItem) {

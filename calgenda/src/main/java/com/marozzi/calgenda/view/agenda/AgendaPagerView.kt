@@ -68,18 +68,17 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
     override fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>, agendaDataList: MutableList<AgendaBaseItem>) {
         pageItems.clear()
         agendaDataList.forEach {
-            when (it) {
-                is AgendaDayItem -> {
-                    pageItems.add(AgendaPageItem(it))
-                }
-                is AgendaEmptyEventItem, is AgendaEventItem -> {
-                    pageItems.find { page ->
-                        page.dayItem.date == it.date
-                    }?.events?.add(it)
-                }
+            if (it is AgendaDayItem) {
+                pageItems.add(AgendaPageItem(it))
             }
         }
-
+        agendaDataList.forEach {
+            if (it is AgendaEmptyEventItem || it is AgendaEventItem) {
+                pageItems.find { page ->
+                    page.dayItem.date.formatDate(CALGENDA_DATE_FORMAT) == it.date.formatDate(CALGENDA_DATE_FORMAT)
+                }?.events?.add(it)
+            }
+        }
         adapter.updateAgendaList(pageItems)
     }
 
