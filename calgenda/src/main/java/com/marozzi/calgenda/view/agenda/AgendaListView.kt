@@ -1,4 +1,4 @@
-package com.marozzi.calgenda.view
+package com.marozzi.calgenda.view.agenda
 
 import android.content.Context
 import android.util.AttributeSet
@@ -9,8 +9,7 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.marozzi.calgenda.adapter.AgendaDayHeaderHolder
-import com.marozzi.calgenda.adapter.AgendaRecyclerAdapter
+import com.marozzi.calgenda.adapter.AgendaListRecyclerAdapter
 import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.model.AgendaBaseItem
 import com.marozzi.calgenda.model.AgendaDayItem
@@ -22,10 +21,10 @@ import java.util.*
 /**
  * Created by amarozzi on 2019-11-08
  */
-class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+internal class AgendaListView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : BaseAgendaView(context, attrs, defStyleAttr) {
 
     private val recyclerView = RecyclerView(context)
-    private val adapter: AgendaRecyclerAdapter
+    private val adapter: AgendaListRecyclerAdapter
     private val layoutManager: LinearLayoutManager
 
     private val header = FrameLayout(context)
@@ -34,7 +33,6 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
     private var currentItemPosition = 0
 
     private var agendaDateIndexMap: TreeMap<String, Int> = TreeMap()
-    var listener: OnAgendaViewListener? = null
 
     private var currentMoth: String = ""
 
@@ -43,7 +41,7 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         addView(header, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
 
         recyclerView.let { it ->
-            it.adapter = AgendaRecyclerAdapter(context).also {
+            it.adapter = AgendaListRecyclerAdapter(context).also {
                 adapter = it
             }
             it.layoutManager = LinearLayoutManager(context).also {
@@ -89,7 +87,7 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         }
         if (item is AgendaDayItem) {
             if (!isAgendaScrollTriggerByCalendar) {
-                adapter.agendaViewHandler?.bindAgendaDayHeader(item, header.tag as AgendaDayHeaderHolder)
+                adapter.agendaViewHandler?.bindAgendaDayHeader(item, header.tag as RecyclerView.ViewHolder)
                 if (isScrollUp) { // when user scroll up, change agenda item scroll action again
                     moveToDate(item.date)
                 }
@@ -103,7 +101,7 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         }
     }
 
-    fun moveToDate(date: Date) {
+    override fun moveToDate(date: Date) {
         isAgendaScrollTriggerByCalendar = true
         header.visibility = View.INVISIBLE
         val pos = agendaDateIndexMap[date.formatDate(CALGENDA_DATE_FORMAT)] ?: 0
@@ -111,7 +109,7 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         isAgendaScrollTriggerByCalendar = false
     }
 
-    fun setAgendaViewHandler(agendaViewHandler: AgendaViewHandler) {
+    override fun setAgendaViewHandler(agendaViewHandler: AgendaViewHandler) {
         adapter.agendaViewHandler = agendaViewHandler
         val customHeader = agendaViewHandler.getAgendaDayHeaderHolder(LayoutInflater.from(context), header)
         header.tag = customHeader
@@ -125,18 +123,8 @@ class AgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet
         header.addView(customHeader.itemView)
     }
 
-    fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>, agendaDataList: MutableList<AgendaBaseItem>) {
+    override fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>, agendaDataList: MutableList<AgendaBaseItem>) {
         this.agendaDateIndexMap = agendaDateIndexMap
         adapter.updateAgendaList(agendaDataList)
     }
-
-    interface OnAgendaViewListener {
-
-        fun onScrollChange()
-
-        fun onDateChange(date: Date)
-
-        fun onMonthChange(date: Date)
-    }
-
 }

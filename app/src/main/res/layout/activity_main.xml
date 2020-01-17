@@ -13,8 +13,8 @@
         android:layout_height="wrap_content"
         android:background="@color/colorPrimary"
         android:drawableEnd="@drawable/ic_arrow_down"
-        android:drawableTint="@color/colorAccent"
         android:drawablePadding="8dp"
+        android:drawableTint="@color/colorAccent"
         android:padding="16dp"
         android:text="Toggle calendar"
         android:textColor="@color/white" />
@@ -24,11 +24,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimary"
+        app:cg_agenda_background_color="@android:color/holo_red_dark"
+        app:cg_agenda_type="page"
         app:cg_calendar_drag_to_open="false"
-        app:cg_week_header_unselected_alpha=".6"
-        app:cg_week_header_text_size="5sp"
         app:cg_week_header_background_color="@color/colorPrimary"
+        app:cg_week_header_text_size="5sp"
+        app:cg_week_header_unselected_alpha=".6"
         app:cg_week_header_weekdays_color="@color/white"
-        app:cg_week_header_weekend_color="@color/white"/>
+        app:cg_week_header_weekend_color="@color/white" />
 
 </LinearLayout>

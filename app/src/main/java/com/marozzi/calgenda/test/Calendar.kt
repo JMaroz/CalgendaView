@@ -4,8 +4,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.adapter.CalendarViewHandler
-import com.marozzi.calgenda.adapter.CalendarViewHolder
 import com.marozzi.calgenda.model.CalendarItem
 import java.util.*
 
@@ -17,10 +17,10 @@ class CalendarViewHandlerImp : CalendarViewHandler {
 
     private val currentYear = Calendar.getInstance().get(Calendar.YEAR)
 
-    override fun getCalendarViewHolder(layoutInflater: LayoutInflater, parent: ViewGroup): CalendarViewHolder = CalendarViewHolderImp(
+    override fun getCalendarViewHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder = CalendarViewHolderImp(
         layoutInflater.inflate(R.layout.calgenda_item_day, parent, false))
 
-    override fun bindCalendarView(item: CalendarItem, holder: CalendarViewHolder) {
+    override fun bindCalendarView(item: CalendarItem, holder: RecyclerView.ViewHolder) {
         val viewHolder = holder as CalendarViewHolderImp
 
         viewHolder.day.text = item.date.get(Calendar.DAY_OF_MONTH).toString()
@@ -68,12 +68,12 @@ class CalendarViewHandlerImp : CalendarViewHandler {
             viewHolder.events.visibility = View.VISIBLE
         }
     }
-}
 
-class CalendarViewHolderImp(itemView: View) : CalendarViewHolder(itemView) {
-    var day: TextView = itemView.findViewById(R.id.item_day)
-    var month: TextView = itemView.findViewById(R.id.item_month)
-    var year: TextView = itemView.findViewById(R.id.item_year)
-    var events: View = itemView.findViewById(R.id.item_events)
-    var today: View = itemView.findViewById(R.id.item_today)
+    class CalendarViewHolderImp(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        var day: TextView = itemView.findViewById(R.id.item_day)
+        var month: TextView = itemView.findViewById(R.id.item_month)
+        var year: TextView = itemView.findViewById(R.id.item_year)
+        var events: View = itemView.findViewById(R.id.item_events)
+        var today: View = itemView.findViewById(R.id.item_today)
+    }
 }

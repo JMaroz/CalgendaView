@@ -13,22 +13,16 @@ import com.marozzi.calgenda.model.AgendaEventItem
  */
 interface AgendaViewHandler {
 
-    fun getAgendaDayHeaderHolder(layoutInflater: LayoutInflater, parent: ViewGroup): AgendaDayHeaderHolder
+    fun getAgendaDayHeaderHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder
 
-    fun getAgendaEmptyEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): AgendaEmptyEventHolder
+    fun getAgendaEmptyEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder
 
-    fun getAgendaEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): AgendaEventHolder
+    fun getAgendaEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder
 
-    fun bindAgendaDayHeader(dayItem: AgendaDayItem, holder: AgendaDayHeaderHolder)
+    fun bindAgendaDayHeader(dayItem: AgendaDayItem, holder: RecyclerView.ViewHolder)
 
-    fun bindAgendaEmptyEvent(emptyEvent: AgendaEmptyEventItem, holder: AgendaEmptyEventHolder)
+    fun bindAgendaEmptyEvent(emptyEvent: AgendaEmptyEventItem, holder: RecyclerView.ViewHolder)
 
-    fun bindAgendaEvent(event: AgendaEventItem, holder: AgendaEventHolder)
+    fun bindAgendaEvent(event: AgendaEventItem, holder: RecyclerView.ViewHolder)
 
 }
-
-abstract class AgendaDayHeaderHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-
-abstract class AgendaEmptyEventHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-
-abstract class AgendaEventHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

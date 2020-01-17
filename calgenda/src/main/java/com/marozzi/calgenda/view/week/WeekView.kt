@@ -1,4 +1,4 @@
-package com.marozzi.calgenda.view
+package com.marozzi.calgenda.view.week
 
 import android.content.Context
 import android.graphics.Color

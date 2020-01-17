@@ -7,6 +7,24 @@
     tools:layout_height="56dp"
     tools:layout_width="56dp">
 
+    <View
+        android:id="@+id/item_today"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_margin="15dp"
+        android:layout_marginBottom="3dp"
+        android:background="@drawable/circle_gray_outline" />
+
+    <View
+        android:id="@+id/item_events"
+        android:layout_width="20dp"
+        android:layout_height="1dp"
+        android:layout_below="@+id/item_day"
+        android:layout_centerHorizontal="true"
+        android:background="#d8d8d8" />
+
     <TextView
         android:id="@+id/item_month"
         android:layout_width="wrap_content"
@@ -29,16 +47,6 @@
         tools:text="21"
         tools:textColor="@color/white" />
 
-    <View
-        android:id="@+id/item_events"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_margin="15dp"
-        android:layout_marginBottom="3dp"
-        android:background="@drawable/circle_gray_outline" />
-
     <TextView
         android:id="@+id/item_year"
         android:layout_width="wrap_content"
@@ -49,13 +57,5 @@
         android:textSize="12sp"
         tools:text="19"
         tools:visibility="visible" />
-
-    <View
-        android:id="@+id/item_today"
-        android:layout_width="20dp"
-        android:layout_height="1dp"
-        android:layout_below="@+id/item_day"
-        android:layout_centerHorizontal="true"
-        android:background="#d8d8d8" />
 
 </RelativeLayout>

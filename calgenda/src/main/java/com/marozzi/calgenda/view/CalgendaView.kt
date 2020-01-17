@@ -13,6 +13,10 @@ import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.adapter.CalendarViewHandler
 import com.marozzi.calgenda.model.*
 import com.marozzi.calgenda.util.*
+import com.marozzi.calgenda.view.agenda.AgendaListView
+import com.marozzi.calgenda.view.agenda.AgendaPagerView
+import com.marozzi.calgenda.view.agenda.BaseAgendaView
+import com.marozzi.calgenda.view.calendar.CalendarView
 import kotlinx.android.synthetic.main.calgenda_view.view.*
 import java.util.*
 
@@ -20,6 +24,8 @@ import java.util.*
  * Created by amarozzi on 2019-11-04
  */
 class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
+
+    private val baseAgendaView: BaseAgendaView
 
     /**
      * Map where for every day has a list of agenda items
@@ -52,9 +58,14 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         val headerUnSelectedAlpha = a.getFloat(R.styleable.CalgendaView_cg_week_header_unselected_alpha, 1f)
         setHeaderCustomizations(headerBackgroundColor, headerWeekdaysColor, headerWeekendColor, headerTextSize, headerUnSelectedAlpha)
 
+        agenda_view.setBackgroundColor(a.getColor(R.styleable.CalgendaView_cg_agenda_background_color, Color.WHITE))
+
+        val agendaType = a.getInt(R.styleable.CalgendaView_cg_agenda_type, 0)
+        baseAgendaView = if (agendaType == 0) AgendaListView(context) else AgendaPagerView(context)
+        agenda_view.addView(baseAgendaView)
         a.recycle()
 
-        agenda_view.listener = object : AgendaView.OnAgendaViewListener {
+        baseAgendaView.listener = object : BaseAgendaView.OnAgendaViewListener {
 
             override fun onMonthChange(date: Date) {
                 changedByUserClick = false
@@ -87,7 +98,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             override fun onCalendarItemSelected(calendarItem: CalendarItem) {
                 synchronized(obj) {
                     currentDate = calendarItem.date
-                    agenda_view.moveToDate(calendarItem.date)
+                    baseAgendaView.moveToDate(calendarItem.date)
                 }
             }
         }
@@ -101,7 +112,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         calendar_week_headbar_view.initWeek(startWeekDay)
 
         calendar_view.setCalendarViewHandler(calendarViewHandler)
-        agenda_view.setAgendaViewHandler(agendaViewHandler)
+        baseAgendaView.setAgendaViewHandler(agendaViewHandler)
 
         //init agenda date list, data 7(col) * 65(row) = 455 (cell)
         calgendaDataMap.clear()
@@ -150,7 +161,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         setEvents(events)
 
         currentDate = Calendar.getInstance().time
-        agenda_view.moveToDate(currentDate!!)
+        baseAgendaView.moveToDate(currentDate!!)
         calendar_view.scrollToDate(currentDate!!)
         calendar_week_headbar_view.setCurrentSelectedDay(currentDate!!.get(Calendar.DAY_OF_WEEK))
     }
@@ -188,7 +199,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
             if (!changedByUserClick && moveToCurrentDay) {
                 currentDate?.let {
-                    agenda_view.moveToDate(it)
+                    baseAgendaView.moveToDate(it)
                     calendar_view.scrollToDate(it)
                     calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
                 }
@@ -233,7 +244,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
         }
 
-        agenda_view.onDataChange(agendaDateIndexMap, agendaDataList)
+        baseAgendaView.onDataChange(agendaDateIndexMap, agendaDataList)
         calendar_view.onDataChange(calendarDateIndexMap, calendarDataList)
     }
 

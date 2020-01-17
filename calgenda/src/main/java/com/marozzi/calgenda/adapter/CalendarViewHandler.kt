@@ -12,10 +12,8 @@ import com.marozzi.calgenda.model.CalendarItem
 
 interface CalendarViewHandler {
 
-    fun getCalendarViewHolder(layoutInflater: LayoutInflater, parent: ViewGroup): CalendarViewHolder
+    fun getCalendarViewHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder
 
-    fun bindCalendarView(item: CalendarItem, holder: CalendarViewHolder)
+    fun bindCalendarView(item: CalendarItem, holder: RecyclerView.ViewHolder)
 
 }
-
-abstract class CalendarViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)

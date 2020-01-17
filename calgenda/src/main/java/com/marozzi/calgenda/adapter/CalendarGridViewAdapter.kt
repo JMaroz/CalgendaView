@@ -10,7 +10,7 @@ import com.marozzi.calgenda.model.CalendarItem
 /**
  * @author by amarozzi on 2019-11-04
  */
-class CalendarGridViewAdapter(context: Context, var listener: ((item: CalendarItem) -> Unit)? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class CalendarGridViewAdapter(context: Context, var listener: ((item: CalendarItem) -> Unit)? = null) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var cellItemSize = 0
 
@@ -36,7 +36,7 @@ class CalendarGridViewAdapter(context: Context, var listener: ((item: CalendarIt
         requireNotNull(calendarViewHandler) { "CalendarViewHandler is null" }
 
         val item = items[position]
-        val holder = viewHolder as CalendarViewHolder
+        val holder = viewHolder
 
         calendarViewHandler!!.bindCalendarView(item, holder)
 
@@ -47,7 +47,7 @@ class CalendarGridViewAdapter(context: Context, var listener: ((item: CalendarIt
     }
 
     override fun getItemCount(): Int {
-        return if (items.isEmpty()) 0 else items.size
+        return items.size
     }
 
     fun setItems(calendarItemList: List<CalendarItem>) {

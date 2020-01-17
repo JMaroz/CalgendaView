@@ -25,4 +25,5 @@ data class CalendarItem(
     /**
      * True if is today
      */
-    var isToday: Boolean = false)
+    var isToday: Boolean = false
+)

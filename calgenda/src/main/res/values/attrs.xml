@@ -8,6 +8,11 @@
         <attr name="cg_week_header_text_size" format="dimension" />
         <attr name="cg_week_header_unselected_alpha" format="float" />
         <attr name="cg_calendar_drag_to_open" format="boolean" />
+        <attr name="cg_agenda_background_color" format="color" />
+        <attr name="cg_agenda_type" format="enum">
+            <enum name="list" value="0" />
+            <enum name="page" value="1" />
+        </attr>
     </declare-styleable>
 
 </resources>

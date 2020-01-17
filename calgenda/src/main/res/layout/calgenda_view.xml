@@ -5,18 +5,18 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.marozzi.calgenda.view.WeekView
+    <com.marozzi.calgenda.view.week.WeekView
         android:id="@+id/calendar_week_headbar_view"
         android:layout_width="match_parent"
         android:layout_height="30dp"/>
 
-    <com.marozzi.calgenda.view.CalendarView
+    <com.marozzi.calgenda.view.calendar.CalendarView
         android:id="@+id/calendar_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         tools:layout_height="200dp" />
 
-    <com.marozzi.calgenda.view.AgendaView
+    <FrameLayout
         android:id="@+id/agenda_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

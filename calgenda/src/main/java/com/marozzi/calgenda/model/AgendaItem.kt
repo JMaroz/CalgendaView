@@ -28,23 +28,14 @@ data class AgendaEmptyEventItem(override var date: Date) : AgendaBaseItem {
     override var type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EMPTY_EVENT
 }
 
-class AgendaEventItem(val event: Event, override val date: Date = event.date, var isFirst: Boolean, var isLast: Boolean) : AgendaBaseItem {
+data class AgendaEventItem(val event: Event, override val date: Date = event.date, var isFirst: Boolean, var isLast: Boolean) : AgendaBaseItem {
 
     override val type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+}
 
-        other as AgendaEventItem
+internal data class AgendaPageItem(val dayItem: AgendaDayItem) {
 
-        if (event != other.event) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return event.hashCode()
-    }
+    val events = mutableListOf<AgendaBaseItem>()
 
 }

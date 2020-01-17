@@ -2,7 +2,9 @@ package com.marozzi.calgenda.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
 
 import com.marozzi.calgenda.model.AgendaBaseItem
@@ -13,7 +15,7 @@ import com.marozzi.calgenda.model.AgendaEventItem
 /**
  * @author by amarozzi on 2019-11-04
  */
-class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+internal class AgendaListRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var agendaItemList: List<AgendaBaseItem> = mutableListOf()
         private set
@@ -33,10 +35,11 @@ class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerVie
 
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         requireNotNull(agendaViewHandler) { "AgendaViewHandler is null" }
-        when (viewHolder) {
-            is AgendaDayHeaderHolder -> agendaViewHandler!!.bindAgendaDayHeader(agendaItemList[position] as AgendaDayItem, viewHolder)
-            is AgendaEventHolder -> agendaViewHandler!!.bindAgendaEvent(agendaItemList[position] as AgendaEventItem, viewHolder)
-            is AgendaEmptyEventHolder -> agendaViewHandler!!.bindAgendaEmptyEvent(agendaItemList[position] as AgendaEmptyEventItem, viewHolder)
+        val item = agendaItemList[position]
+        when (item.type) {
+            AgendaBaseItem.AGENDA_ITEM_TYPE_DAY -> agendaViewHandler!!.bindAgendaDayHeader(item as AgendaDayItem, viewHolder)
+            AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT -> agendaViewHandler!!.bindAgendaEvent(item as AgendaEventItem, viewHolder)
+            else -> agendaViewHandler!!.bindAgendaEmptyEvent(item as AgendaEmptyEventItem, viewHolder)
         }
     }
 
@@ -46,7 +49,7 @@ class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerVie
     }
 
     override fun getItemCount(): Int {
-        return if (agendaItemList.isEmpty()) 0 else agendaItemList.size
+        return agendaItemList.size
     }
 
     /**
@@ -56,5 +59,4 @@ class AgendaRecyclerAdapter(context: Context) : RecyclerView.Adapter<RecyclerVie
         this.agendaItemList = agendaItemList
         notifyDataSetChanged()
     }
-
 }

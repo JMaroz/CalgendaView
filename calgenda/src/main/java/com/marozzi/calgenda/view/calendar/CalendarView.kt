@@ -1,4 +1,4 @@
-package com.marozzi.calgenda.view
+package com.marozzi.calgenda.view.calendar
 
 import android.animation.ValueAnimator
 import android.content.Context
