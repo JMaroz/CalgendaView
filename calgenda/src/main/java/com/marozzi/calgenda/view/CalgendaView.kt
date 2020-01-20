@@ -183,8 +183,10 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         synchronized(obj) {
             events.forEach { event ->
                 val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
-                calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
-                    add(AgendaEventItem(event, isFirst = false, isLast = false))
+                if (calgendaDataMap.containsKey(date)) {
+                    calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
+                        add(AgendaEventItem(event, isFirst = false, isLast = false))
+                    }
                 }
             }
 
