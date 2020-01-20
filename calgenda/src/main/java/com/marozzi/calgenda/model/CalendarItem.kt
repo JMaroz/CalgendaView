@@ -1,5 +1,7 @@
 package com.marozzi.calgenda.model
 
+import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT
+import com.marozzi.calgenda.util.formatDate
 import java.util.*
 
 /**
@@ -15,15 +17,18 @@ data class CalendarItem(
      */
     var isAlternation: Boolean = false,
     /**
-     * List of agenda event item set for the date
-     */
-    var agendaEvents: Set<AgendaEventItem> = emptySet(),
-    /**
      * True if selected
      */
     var isSelected: Boolean = false,
     /**
      * True if is today
      */
-    var isToday: Boolean = false
-)
+    var isToday: Boolean = false) {
+
+    /**
+     * List of agenda event item set for the date
+     */
+    val agendaEvents: MutableSet<AgendaBaseItem> = mutableSetOf()
+
+    fun getDateAsString(): String = date.formatDate(CALGENDA_DATE_FORMAT)
+}

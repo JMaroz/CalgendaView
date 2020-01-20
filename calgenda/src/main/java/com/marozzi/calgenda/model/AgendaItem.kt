@@ -1,5 +1,7 @@
 package com.marozzi.calgenda.model
 
+import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT
+import com.marozzi.calgenda.util.formatDate
 import java.util.*
 
 /**
@@ -16,6 +18,7 @@ interface AgendaBaseItem {
     val date: Date
     val type: Int
 
+    fun getDateAsString(): String = date.formatDate(CALGENDA_DATE_FORMAT)
 }
 
 data class AgendaDayItem(override val date: Date, var isToday: Boolean) : AgendaBaseItem {

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.adapter.CalendarViewHandler
+import com.marozzi.calgenda.model.AgendaEventItem
 import com.marozzi.calgenda.model.CalendarItem
 import java.util.*
 
@@ -62,7 +63,9 @@ class CalendarViewHandlerImp : CalendarViewHandler {
             viewHolder.events.alpha = .6f
         }
 
-        if (item.agendaEvents.isEmpty()) {
+        val events = if (item.agendaEvents.isEmpty()) false else item.agendaEvents.find { it is AgendaEventItem } != null
+
+        if (!events) {
             viewHolder.events.visibility = View.GONE
         } else {
             viewHolder.events.visibility = View.VISIBLE

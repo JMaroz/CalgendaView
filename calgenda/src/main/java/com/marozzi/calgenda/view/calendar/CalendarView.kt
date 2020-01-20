@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.adapter.CalendarGridViewAdapter
 import com.marozzi.calgenda.adapter.CalendarViewHandler
+import com.marozzi.calgenda.model.AgendaBaseItem
 import com.marozzi.calgenda.model.CalendarItem
 import com.marozzi.calgenda.util.*
 import java.util.*
@@ -35,7 +36,8 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     private val calendarMaxHeight: Int = cellItemHeight * calendarMaxRow
 
     private var currentMonth: String = ""
-    private var calendarDateIndexMap: TreeMap<String, Int> = TreeMap()
+    private var calendarIndex = Collections.synchronizedSortedMap(TreeMap<String, Int>())
+    private var calendarItems = Collections.synchronizedList(mutableListOf<CalendarItem>())
 
     var status = CalendarViewStatus.COLLAPSE
         private set
@@ -100,13 +102,64 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
         recyclerView.layoutParams = layoutParams
     }
 
-    fun setCalendarViewHandler(calendarViewHandler: CalendarViewHandler) {
-        adapter.calendarViewHandler = calendarViewHandler
+    fun init(startDate: Date, endDate: Date, callback: () -> Unit) {
+        AppExecutors.background().execute {
+            calendarItems.clear()
+            calendarIndex.clear()
+            val startDateSanitized = Calendar.getInstance().apply {
+                time = startDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val endDateSanitized = Calendar.getInstance().apply {
+                time = endDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val today = Calendar.getInstance().apply {
+                time = startDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            var index = 0
+            while (startDateSanitized <= endDateSanitized) {
+                val isToday = today == startDateSanitized
+                val alternation = (startDateSanitized.get(Calendar.MONTH) - today.get(Calendar.MONTH)) % 2 == 0
+                calendarItems.add(CalendarItem(startDateSanitized.time, alternation, isToday, isToday))
+                calendarIndex[startDateSanitized.time.formatDate(CALGENDA_DATE_FORMAT)] = index++
+                startDateSanitized.add(Calendar.DAY_OF_MONTH, 1)
+            }
+            AppExecutors.mainThread().execute { callback.invoke() }
+        }
     }
 
-    fun onDataChange(calendarDateIndexMap: TreeMap<String, Int>, calendarItemList: List<CalendarItem>) {
-        this.calendarDateIndexMap = calendarDateIndexMap
-        adapter.setItems(calendarItemList)
+    fun onDataChange(newData: List<AgendaBaseItem>, callback: () -> Unit) {
+        AppExecutors.background().execute {
+            synchronized(calendarItems) {
+                calendarItems.forEach {
+                    it.agendaEvents.clear()
+                }
+                newData.forEach { agenda ->
+                    calendarIndex[agenda.getDateAsString()]?.let {
+                        calendarItems[it].agendaEvents.add(agenda)
+                    }
+                }
+                AppExecutors.mainThread().execute {
+                    post { adapter.setItems(calendarItems) }
+                    callback.invoke()
+                }
+            }
+        }
+    }
+
+    fun setCalendarViewHandler(calendarViewHandler: CalendarViewHandler) {
+        adapter.calendarViewHandler = calendarViewHandler
     }
 
     fun changeStatus(status: CalendarViewStatus) {
@@ -135,7 +188,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     }
 
     fun scrollToDate(date: Date) {
-        scrollToDateByPosition(calendarDateIndexMap[date.formatDate(CALGENDA_DATE_FORMAT)] ?: 0)
+        scrollToDateByPosition(calendarIndex[date.formatDate(CALGENDA_DATE_FORMAT)] ?: 0)
     }
 
     fun getFirstCalendarItemVisible(): CalendarItem? = adapter.getItem(layoutManager.findFirstVisibleItemPosition())

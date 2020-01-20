@@ -10,15 +10,17 @@ import java.util.*
 /**
  * Created by amarozzi on 2020-01-17
  */
-internal abstract class BaseAgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)  : FrameLayout(context, attrs, defStyleAttr) {
+internal abstract class BaseAgendaView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0) : FrameLayout(context, attrs, defStyleAttr) {
 
     var listener: OnAgendaViewListener? = null
+
+    abstract fun init(startDate: Date, endDate: Date, callback: () -> Unit)
 
     abstract fun setAgendaViewHandler(agendaViewHandler: AgendaViewHandler)
 
     abstract fun moveToDate(date: Date)
 
-    abstract fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>, agendaDataList: MutableList<AgendaBaseItem>)
+    abstract fun onDataChange(agendaDataList: List<AgendaBaseItem>, callback: () -> Unit)
 
     interface OnAgendaViewListener {
 

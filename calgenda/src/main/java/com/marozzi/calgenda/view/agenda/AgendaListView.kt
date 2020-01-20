@@ -13,6 +13,9 @@ import com.marozzi.calgenda.adapter.AgendaListRecyclerAdapter
 import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.model.AgendaBaseItem
 import com.marozzi.calgenda.model.AgendaDayItem
+import com.marozzi.calgenda.model.AgendaEmptyEventItem
+import com.marozzi.calgenda.util.*
+import com.marozzi.calgenda.util.AppExecutors
 import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT
 import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT_MONTH
 import com.marozzi.calgenda.util.formatDate
@@ -32,9 +35,10 @@ internal class AgendaListView @JvmOverloads constructor(context: Context, attrs:
     private var isAgendaScrollTriggerByCalendar = false
     private var currentItemPosition = 0
 
-    private var agendaDateIndexMap: TreeMap<String, Int> = TreeMap()
-
     private var currentMoth: String = ""
+
+    private val items = Collections.synchronizedMap(TreeMap<String, MutableList<AgendaBaseItem>>())
+    private val itemsIndex = Collections.synchronizedMap(TreeMap<String, Int>())
 
     init {
         addView(recyclerView, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
@@ -82,7 +86,7 @@ internal class AgendaListView @JvmOverloads constructor(context: Context, attrs:
     private fun handleStickyHeaderUIChange(position: Int, isScrollUp: Boolean) {
         var item = adapter.agendaItemList[position]
         if (!isScrollUp) { //scroll down -> show the day info before the current date
-            val index = agendaDateIndexMap[item.date.formatDate("yyyyMMdd")] ?: 0
+            val index = itemsIndex[item.date.formatDate("yyyyMMdd")] ?: 0
             item = adapter.agendaItemList[index]
         }
         if (item is AgendaDayItem) {
@@ -104,9 +108,78 @@ internal class AgendaListView @JvmOverloads constructor(context: Context, attrs:
     override fun moveToDate(date: Date) {
         isAgendaScrollTriggerByCalendar = true
         header.visibility = View.INVISIBLE
-        val pos = agendaDateIndexMap[date.formatDate(CALGENDA_DATE_FORMAT)] ?: 0
-        layoutManager.scrollToPositionWithOffset(pos, 0)
-        isAgendaScrollTriggerByCalendar = false
+        itemsIndex[date.formatDate(CALGENDA_DATE_FORMAT)]?.let { pos ->
+            recyclerView.post {
+                layoutManager.scrollToPositionWithOffset(pos, 0)
+            }
+            isAgendaScrollTriggerByCalendar = false
+        }
+    }
+
+    override fun init(startDate: Date, endDate: Date, callback: () -> Unit) {
+        AppExecutors.background().execute {
+            items.clear()
+            itemsIndex.clear()
+            val startDateSanitized = Calendar.getInstance().apply {
+                time = startDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val endDateSanitized = Calendar.getInstance().apply {
+                time = endDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val today = Calendar.getInstance().apply {
+                time = startDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            var index = 0
+            while (startDateSanitized <= endDateSanitized) {
+                val item = AgendaDayItem(startDateSanitized.time, startDateSanitized == today)
+                items[startDateSanitized.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableListOf<AgendaBaseItem>(item)
+                itemsIndex[startDateSanitized.time.formatDate(CALGENDA_DATE_FORMAT)] = index++
+                startDateSanitized.add(Calendar.DAY_OF_MONTH, 1)
+            }
+            AppExecutors.mainThread().execute { callback.invoke() }
+        }
+    }
+
+    override fun onDataChange(agendaDataList: List<AgendaBaseItem>, callback: () -> Unit) {
+        AppExecutors.background().execute {
+            items.forEach {
+                val each = it.value.iterator()
+                while (each.hasNext()) {
+                    if (each.next() !is AgendaDayItem) {
+                        each.remove()
+                    }
+                }
+            }
+            itemsIndex.clear()
+
+            agendaDataList.forEach { item ->
+                items[item.getDateAsString()]?.add(item)
+            }
+
+            var index = 0
+            val addData = mutableListOf<AgendaBaseItem>()
+            items.forEach {
+                itemsIndex[it.key] = index
+                index += it.value.size
+                addData.addAll(it.value)
+            }
+            AppExecutors.mainThread().execute {
+                recyclerView.post { adapter.updateAgendaList(addData) }
+                callback.invoke()
+            }
+        }
     }
 
     override fun setAgendaViewHandler(agendaViewHandler: AgendaViewHandler) {
@@ -121,10 +194,5 @@ internal class AgendaListView @JvmOverloads constructor(context: Context, attrs:
             }
         })
         header.addView(customHeader.itemView)
-    }
-
-    override fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>, agendaDataList: MutableList<AgendaBaseItem>) {
-        this.agendaDateIndexMap = agendaDateIndexMap
-        adapter.updateAgendaList(agendaDataList)
     }
 }

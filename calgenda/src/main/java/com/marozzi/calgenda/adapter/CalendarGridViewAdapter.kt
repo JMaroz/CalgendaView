@@ -3,6 +3,7 @@ package com.marozzi.calgenda.adapter
 import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.model.CalendarItem
 
@@ -67,5 +68,23 @@ internal class CalendarGridViewAdapter(context: Context, var listener: ((item: C
 
     fun getItem(position: Int): CalendarItem? {
         return if (position < items.size) items[position] else null
+    }
+
+    private class MyDiffCallback(private val oldList: List<CalendarItem>, private val newList: List<CalendarItem>) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].getDateAsString() === newList[newItemPosition].getDateAsString()
+        }
+
+        override fun areContentsTheSame(oldPosition: Int, newPosition: Int): Boolean {
+            val name = oldList[oldPosition]
+            val name1 = newList[newPosition]
+
+            return name.agendaEvents== name1.agendaEvents
+        }
     }
 }

@@ -20,6 +20,7 @@ import com.marozzi.calgenda.view.calendar.CalendarView
 import kotlinx.android.synthetic.main.calgenda_view.view.*
 import java.util.*
 
+
 /**
  * Created by amarozzi on 2019-11-04
  */
@@ -30,9 +31,9 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     /**
      * Map where for every day has a list of agenda items
      */
-    private var calgendaDataMap = TreeMap<String, MutableSet<AgendaEventItem>>()
+    private var dataMap: SortedMap<String, MutableSet<AgendaBaseItem>> = Collections.synchronizedSortedMap(TreeMap<String, MutableSet<AgendaBaseItem>>())
 
-    var calgendaListener: OnCalgendaListener? = null
+    var listener: OnCalgendaListener? = null
 
     var currentDate: Date? = null
         private set
@@ -42,7 +43,11 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
      */
     private var changedByUserClick = false
 
-    private val obj = Any()
+    private var startDate: Date = Date()
+    private var endDate: Date = Date()
+
+    private var agendaInit = false
+    private var calendarInit = false
 
     init {
         addView(LayoutInflater.from(context).inflate(R.layout.calgenda_view, this, false))
@@ -69,7 +74,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
 
             override fun onMonthChange(date: Date) {
                 changedByUserClick = false
-                calgendaListener?.onMonthChange(date)
+                listener?.onMonthChange(date)
             }
 
             override fun onScrollChange() {
@@ -77,13 +82,11 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             }
 
             override fun onDateChange(date: Date) {
-                synchronized(obj) {
-                    currentDate = date
-                    calendar_view.postDelayed({
-                        calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
-                        calendar_view.scrollToDate(date)
-                    }, 200)
-                }
+                currentDate = date
+                calendar_view.postDelayed({
+                    calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
+                    calendar_view.scrollToDate(date)
+                }, 200)
             }
         }
 
@@ -92,14 +95,12 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
             override fun onMonthChange(date: Date) {
                 changedByUserClick = true
                 calendar_week_headbar_view.setCurrentSelectedDay(date.get(Calendar.DAY_OF_WEEK))
-                calgendaListener?.onMonthChange(date)
+                listener?.onMonthChange(date)
             }
 
             override fun onCalendarItemSelected(calendarItem: CalendarItem) {
-                synchronized(obj) {
-                    currentDate = calendarItem.date
-                    baseAgendaView.moveToDate(calendarItem.date)
-                }
+                currentDate = calendarItem.date
+                baseAgendaView.moveToDate(calendarItem.date)
             }
         }
     }
@@ -108,63 +109,79 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         calendar_week_headbar_view.setCustomizations(headerBackgroundColor, headerWeekdaysColor, headerWeekendColor, headerTextSize, headerUnSelectedAlpha)
     }
 
-    fun initCalgenda(calendarViewHandler: CalendarViewHandler, agendaViewHandler: AgendaViewHandler, startDate: Date, endDate: Date, startWeekDay: Int, events: List<Event>) {
+    fun initCalgenda(calendarViewHandler: CalendarViewHandler, agendaViewHandler: AgendaViewHandler, startDate: Date, endDate: Date, startWeekDay: Int, events: List<Event> = emptyList()) {
         calendar_week_headbar_view.initWeek(startWeekDay)
 
         calendar_view.setCalendarViewHandler(calendarViewHandler)
         baseAgendaView.setAgendaViewHandler(agendaViewHandler)
 
-        //init agenda date list, data 7(col) * 65(row) = 455 (cell)
-        calgendaDataMap.clear()
+        AppExecutors.background().execute {
+            //init agenda date list, data 7(col) * 65(row) = 455 (cell)
+            dataMap.clear()
 
-        val todayCalendar1 = Calendar.getInstance().apply {
-            firstDayOfWeek = startWeekDay
-        }
-        val todayCalendar2 = Calendar.getInstance().apply {
-            firstDayOfWeek = startWeekDay
-        }
+            val todayCalendar1 = Calendar.getInstance().apply {
+                firstDayOfWeek = startWeekDay
+            }
+            val todayCalendar2 = Calendar.getInstance().apply {
+                firstDayOfWeek = startWeekDay
+            }
 
-        //init current week days
-        val todayOfWeek = todayCalendar1.get(Calendar.DAY_OF_WEEK)
-        for (i in todayOfWeek downTo startWeekDay) {
-            calgendaDataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
-            todayCalendar1.add(Calendar.DAY_OF_MONTH, -1)
-        }
-        todayCalendar2.add(Calendar.DAY_OF_MONTH, 1) //tomorrow
-        for (i in todayOfWeek + 1..Calendar.SATURDAY + 1) {
-            calgendaDataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
-            todayCalendar2.add(Calendar.DAY_OF_MONTH, 1)
-        }
+            //init current week days
+            val todayOfWeek = todayCalendar1.get(Calendar.DAY_OF_WEEK)
+            for (i in todayOfWeek downTo startWeekDay) {
+                dataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
+                todayCalendar1.add(Calendar.DAY_OF_MONTH, -1)
+            }
+            todayCalendar2.add(Calendar.DAY_OF_MONTH, 1) //tomorrow
+            for (i in todayOfWeek + 1..Calendar.SATURDAY + 1) {
+                dataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
+                todayCalendar2.add(Calendar.DAY_OF_MONTH, 1)
+            }
 
-        //init row before the current week days
-        var min = startDate.daysBetween(todayCalendar1.time)
-        while (min % 7 != 0) {
-            min++
-        }
-        val beforeSize = min
-        for (i in 0 until beforeSize) {
-            calgendaDataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
-            todayCalendar1.add(Calendar.DAY_OF_MONTH, -1)
-        }
+            //init row before the current week days
+            var min = startDate.daysBetween(todayCalendar1.time)
+            while (min % 7 != 0) {
+                min++
+            }
+            val beforeSize = min
+            for (i in 0 until beforeSize) {
+                dataMap[todayCalendar1.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
+                todayCalendar1.add(Calendar.DAY_OF_MONTH, -1)
+            }
 
-        //init row after the current week days
-        var max = todayCalendar2.time.daysBetween(endDate)
-        while (max % 7 != 0) {
-            max++
-        }
-        val afterSize = max
-        for (i in 0 until afterSize) {
-            calgendaDataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
-            todayCalendar2.add(Calendar.DAY_OF_MONTH, 1)
-        }
+            //init row after the current week days
+            var max = todayCalendar2.time.daysBetween(endDate)
+            while (max % 7 != 0) {
+                max++
+            }
+            val afterSize = max
+            for (i in 0 until afterSize) {
+                dataMap[todayCalendar2.time.formatDate(CALGENDA_DATE_FORMAT)] = mutableSetOf()
+                todayCalendar2.add(Calendar.DAY_OF_MONTH, 1)
+            }
 
-        setEvents(events)
+            this@CalgendaView.startDate = dataMap.keys.first().getDate(CALGENDA_DATE_FORMAT)!!
+            this@CalgendaView.endDate = dataMap.keys.last().getDate(CALGENDA_DATE_FORMAT)!!
 
-        currentDate = Calendar.getInstance().time
-        baseAgendaView.moveToDate(currentDate!!)
-        calendar_view.scrollToDate(currentDate!!)
-        calendar_week_headbar_view.setCurrentSelectedDay(currentDate!!.get(Calendar.DAY_OF_WEEK))
+            currentDate = Calendar.getInstance().time
+            AppExecutors.mainThread().execute {
+                fun check() {
+                    if (isInit()) addEvents(events, true)
+                    listener?.onInitDone()
+                }
+                baseAgendaView.init(this@CalgendaView.startDate, this@CalgendaView.endDate) {
+                    agendaInit = true
+                    check()
+                }
+                calendar_view.init(this@CalgendaView.startDate, this@CalgendaView.endDate) {
+                    calendarInit = true
+                    check()
+                }
+            }
+        }
     }
+
+    fun isInit(): Boolean = agendaInit && calendarInit
 
     fun toggleCalendar() {
         calendar_view.changeStatus(if (calendar_view.status == CalendarView.CalendarViewStatus.COLLAPSE) {
@@ -174,83 +191,81 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
         })
     }
 
-    fun setEvents(events: List<Event>) {
-        calgendaDataMap.values.forEach { it.clear() }
-        addEvents(events, false)
+    fun setEvents(events: List<Event>, moveToCurrentDay: Boolean) {
+        dataMap.values.forEach { it.clear() } // clear all the events for every day
+        addEvents(events, moveToCurrentDay)
     }
 
     fun addEvents(events: List<Event>, moveToCurrentDay: Boolean) {
-        synchronized(obj) {
+        AppExecutors.background().execute {
             events.forEach { event ->
                 val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
-                if (calgendaDataMap.containsKey(date)) {
-                    calgendaDataMap[date] = (calgendaDataMap[date] ?: mutableSetOf()).apply {
+                if (event.date in startDate..endDate) {
+                    dataMap[date] = (dataMap[date] ?: mutableSetOf()).apply {
                         add(AgendaEventItem(event, isFirst = false, isLast = false))
                     }
                 }
             }
 
-            calgendaDataMap.values.forEach {
-                it.forEachIndexed { index, agendaEventItem ->
-                    agendaEventItem.isFirst = index == 0
-                    agendaEventItem.isLast = index == it.size - 1
-                }
-            }
-
-            showCalgendaData()
-
-            if (!changedByUserClick && moveToCurrentDay) {
-                currentDate?.let {
-                    baseAgendaView.moveToDate(it)
-                    calendar_view.scrollToDate(it)
-                    calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
-                }
-            }
-        }
-    }
-
-    private fun showCalgendaData() {
-        val calendar = Calendar.getInstance()
-        val currentMonth = calendar.get(Calendar.MONTH)
-        val today = calendar.time
-
-        //construct agenda list data model
-        val agendaDataList: MutableList<AgendaBaseItem> = mutableListOf()
-        val agendaDateIndexMap: TreeMap<String, Int> = TreeMap()
-        var indexAgenda = 0
-        calgendaDataMap.entries.forEach { entry ->
-            entry.key.getDate(CALGENDA_DATE_FORMAT)?.let {
-                val item = AgendaDayItem(it, today.compare(it) == 0)
-                agendaDataList.add(item)
-                agendaDateIndexMap[entry.key] = indexAgenda
-                indexAgenda += if (entry.value.isEmpty()) { // put empty event item
-                    agendaDataList.add(AgendaEmptyEventItem(it))
-                    2
+            dataMap.entries.forEach {
+                if (it.value.isEmpty()) {
+                    it.value.add(AgendaEmptyEventItem(it.key.getDate(CALGENDA_DATE_FORMAT)!!))
                 } else {
-                    agendaDataList.addAll(entry.value)
-                    entry.value.size + 1
+                    var containsEmptyEvent = false
+                    var containsEvent = false
+                    it.value.forEachIndexed { index, agendaEventItem ->
+                        if (!containsEmptyEvent && agendaEventItem is AgendaEmptyEventItem)
+                            containsEmptyEvent = true
+                        if (!containsEvent && agendaEventItem is AgendaEventItem)
+                            containsEvent = true
+                        if (agendaEventItem is AgendaEventItem) {
+                            agendaEventItem.isFirst = index == 0
+                            agendaEventItem.isLast = index == it.value.size - 1
+                        }
+                    }
+                    if (containsEmptyEvent && containsEvent) { // remove empty event
+                        val each = it.value.iterator()
+                        while (each.hasNext()) {
+                            if (each.next() is AgendaEmptyEventItem) {
+                                each.remove()
+                            }
+                        }
+                    }
+                }
+            }
+
+            val allData = mutableListOf<AgendaBaseItem>()
+            dataMap.values.map {
+                allData.addAll(it)
+            }
+
+            AppExecutors.mainThread().execute {
+                var agendaFinish = false
+                var calendarFinish = false
+                fun check() {
+                    if (agendaFinish && calendarFinish && !changedByUserClick && moveToCurrentDay) {
+                        currentDate?.let {
+                            baseAgendaView.moveToDate(it)
+                            calendar_view.scrollToDate(it)
+                            calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
+                        }
+                    }
+                }
+                baseAgendaView.onDataChange(allData) {
+                    agendaFinish = true
+                    check()
+                }
+                calendar_view.onDataChange(allData) {
+                    calendarFinish = true
+                    check()
                 }
             }
         }
-
-        val calendarDataList: MutableList<CalendarItem> = mutableListOf()
-        val calendarDateIndexMap: TreeMap<String, Int> = TreeMap()
-        calgendaDataMap.entries.forEachIndexed { index, entry ->
-            entry.key.getDate(CALGENDA_DATE_FORMAT)?.let {
-                val isToday = today.compare(it) == 0
-                val alternation = (it.get(Calendar.MONTH) - currentMonth) % 2 == 0
-                val item = CalendarItem(it, alternation, entry.value, isToday, isToday)
-                calendarDataList.add(item)
-                calendarDataList.sortBy { it.date }
-                calendarDateIndexMap[entry.key] = index
-            }
-        }
-
-        baseAgendaView.onDataChange(agendaDateIndexMap, agendaDataList)
-        calendar_view.onDataChange(calendarDateIndexMap, calendarDataList)
     }
 
     interface OnCalgendaListener {
+
+        fun onInitDone()
 
         fun onMonthChange(newMonth: Date)
     }

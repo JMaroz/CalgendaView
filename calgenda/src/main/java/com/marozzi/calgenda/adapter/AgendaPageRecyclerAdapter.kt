@@ -4,6 +4,9 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.ScrollView
+import androidx.core.widget.NestedScrollView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.model.*
 
@@ -27,7 +30,7 @@ internal class AgendaPageRecyclerAdapter(context: Context) : RecyclerView.Adapte
     override fun onBindViewHolder(viewHolder: RecyclerView.ViewHolder, position: Int) {
         requireNotNull(agendaViewHandler) { "AgendaViewHandler is null" }
         val item = agendaItemList[position]
-        val group = viewHolder.itemView as LinearLayout
+        val group = (viewHolder.itemView as NestedScrollView).getChildAt(0) as LinearLayout
         group.removeAllViews()
 
         val dayViewHolder = agendaViewHandler!!.getAgendaDayHeaderHolder(layoutInflater, group)
@@ -57,13 +60,37 @@ internal class AgendaPageRecyclerAdapter(context: Context) : RecyclerView.Adapte
     /**
      * update list
      */
-    fun updateAgendaList(agendaItemList: List<AgendaPageItem>) {
-        this.agendaItemList = agendaItemList
-        notifyDataSetChanged()
+    fun updateAgendaList(items: List<AgendaPageItem>) {
+        val diffCallback = MyDiffCallback(agendaItemList, items)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+        this.agendaItemList = items
+        diffResult.dispatchUpdatesTo(this)
+        //        notifyDataSetChanged()
     }
 
-    private class AgendaPageViewHolder(context: Context) : RecyclerView.ViewHolder(LinearLayout(context).apply {
+    private class AgendaPageViewHolder(context: Context) : RecyclerView.ViewHolder(NestedScrollView(context).apply {
         layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
-        orientation = LinearLayout.VERTICAL
+        addView(LinearLayout(context).apply {
+            layoutParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+            orientation = LinearLayout.VERTICAL
+        })
     })
+
+    private class MyDiffCallback(private val oldList: List<AgendaPageItem>, private val newList: List<AgendaPageItem>) : DiffUtil.Callback() {
+
+        override fun getOldListSize(): Int = oldList.size
+
+        override fun getNewListSize(): Int = newList.size
+
+        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+            return oldList[oldItemPosition].dayItem.getDateAsString() === newList[newItemPosition].dayItem.getDateAsString()
+        }
+
+        override fun areContentsTheSame(oldPosition: Int, newPosition: Int): Boolean {
+            val name = oldList[oldPosition]
+            val name1 = newList[newPosition]
+
+            return name.events == name1.events
+        }
+    }
 }

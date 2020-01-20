@@ -25,7 +25,7 @@
         android:layout_height="match_parent"
         android:background="@color/colorPrimary"
         app:cg_agenda_background_color="@android:color/holo_red_dark"
-        app:cg_agenda_type="page"
+        app:cg_agenda_type="list"
         app:cg_calendar_drag_to_open="false"
         app:cg_week_header_background_color="@color/colorPrimary"
         app:cg_week_header_text_size="5sp"

@@ -7,10 +7,12 @@ import androidx.viewpager2.widget.ViewPager2
 import com.marozzi.calgenda.adapter.AgendaPageRecyclerAdapter
 import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.model.*
+import com.marozzi.calgenda.util.AppExecutors
 import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT
 import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT_MONTH
 import com.marozzi.calgenda.util.formatDate
 import java.util.*
+import kotlin.collections.HashMap
 
 /**
  * Created by amarozzi on 2019-11-08
@@ -19,9 +21,9 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
 
     private val viewPager = ViewPager2(context)
     private val adapter: AgendaPageRecyclerAdapter
-    private val pageItems = mutableListOf<AgendaPageItem>()
 
-    private var isAgendaScrollTriggerByCalendar = false
+    private val pageItems = Collections.synchronizedList(mutableListOf<AgendaPageItem>())
+    private val pageItemsIndex = Collections.synchronizedMap(HashMap<String, Int>())
 
     private var currentMoth: String = ""
 
@@ -54,32 +56,75 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
     }
 
     override fun moveToDate(date: Date) {
-        isAgendaScrollTriggerByCalendar = true
         val dateFormat = date.formatDate(CALGENDA_DATE_FORMAT)
-        val pos = pageItems.indexOfFirst { it.dayItem.date.formatDate(CALGENDA_DATE_FORMAT) == dateFormat }
-        viewPager.setCurrentItem(pos, false)
-        isAgendaScrollTriggerByCalendar = false
+        val pos = pageItemsIndex[dateFormat] ?: -1
+        viewPager.post {
+            viewPager.setCurrentItem(pos, false)
+        }
+    }
+
+    override fun init(startDate: Date, endDate: Date, callback: () -> Unit) {
+        AppExecutors.background().execute {
+            pageItems.clear()
+            pageItemsIndex.clear()
+            val startDateSanitized = Calendar.getInstance().apply {
+                time = startDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val endDateSanitized = Calendar.getInstance().apply {
+                time = endDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            val today = Calendar.getInstance().apply {
+                time = startDate
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }
+            var index = 0
+            while (startDateSanitized <= endDateSanitized) {
+                pageItems.add(AgendaPageItem(AgendaDayItem(startDateSanitized.time, startDateSanitized == today))/*.apply {
+                    this.events.add(AgendaEmptyEventItem(startDateSanitized.time))
+                }*/)
+                pageItemsIndex[startDateSanitized.time.formatDate(CALGENDA_DATE_FORMAT)] = index++
+                startDateSanitized.add(Calendar.DAY_OF_MONTH, 1)
+            }
+            AppExecutors.mainThread().execute { callback.invoke() }
+        }
     }
 
     override fun setAgendaViewHandler(agendaViewHandler: AgendaViewHandler) {
         adapter.agendaViewHandler = agendaViewHandler
     }
 
-    override fun onDataChange(agendaDateIndexMap: TreeMap<String, Int>, agendaDataList: MutableList<AgendaBaseItem>) {
-        pageItems.clear()
-        agendaDataList.forEach {
-            if (it is AgendaDayItem) {
-                pageItems.add(AgendaPageItem(it))
+    override fun onDataChange(agendaDataList: List<AgendaBaseItem>, callback: () -> Unit) {
+        AppExecutors.background().execute {
+            synchronized(pageItems) {
+                //delete old events
+                pageItems.forEach {
+                    it.events.clear()
+                }
+                //add new events
+                agendaDataList.forEach {
+                    if (it is AgendaEmptyEventItem || it is AgendaEventItem) {
+                        pageItemsIndex[it.getDateAsString()]?.let { index ->
+                            pageItems[index]?.events?.add(it)
+                        }
+                    }
+                }
+            }
+            AppExecutors.mainThread().execute {
+                post { adapter.updateAgendaList(pageItems) }
+                callback.invoke()
             }
         }
-        agendaDataList.forEach {
-            if (it is AgendaEmptyEventItem || it is AgendaEventItem) {
-                pageItems.find { page ->
-                    page.dayItem.date.formatDate(CALGENDA_DATE_FORMAT) == it.date.formatDate(CALGENDA_DATE_FORMAT)
-                }?.events?.add(it)
-            }
-        }
-        adapter.updateAgendaList(pageItems)
     }
 
 }

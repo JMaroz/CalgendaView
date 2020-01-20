@@ -25,28 +25,37 @@ class MainActivity : AppCompatActivity() {
 
         val endDate = Calendar.getInstance().time
 
-        calgenda.initCalgenda(CalendarViewHandlerImp(), AgendaViewHandlerImp(), startDate, endDate, Calendar.MONDAY, emptyList())
-        calgenda.calgendaListener = object : CalgendaView.OnCalgendaListener {
+        calgenda.listener = object : CalgendaView.OnCalgendaListener {
+            override fun onInitDone() {
+
+            }
+
             override fun onMonthChange(newMonth: Date) {
                 toggle_calendar.text = newMonth.formatDate("MMMM yyyy").toUpperCase(Locale.getDefault())
-                calgenda.postDelayed({
-                    calgenda.addEvents(mockEvents(newMonth), true)
-                }, 1000)
+                AppExecutors.diskIO().execute {
+                    mockEvents(newMonth) { events ->
+                        AppExecutors.mainThread().execute {
+                            calgenda.addEvents(events, true)
+                        }
+                    }
+                }
             }
         }
+        calgenda.initCalgenda(CalendarViewHandlerImp(), AgendaViewHandlerImp(), startDate, endDate, Calendar.MONDAY)
     }
 
-    private fun mockEvents(date: Date): List<Event> {
+    private fun mockEvents(date: Date, callback: (List<Event>) -> Unit) {
         val events = mutableListOf<MockEvent>()
         val current = Calendar.getInstance().apply {
             time = date
-            set(Calendar.DAY_OF_MONTH, getActualMaximum(Calendar.DAY_OF_MONTH))
         }
         for (i in 0..100) {
-            current.add(Calendar.DAY_OF_MONTH, Random.nextInt(-1, 1))
-            events.add(MockEvent(UUID.randomUUID().toString(), current.time))
+            if (Random.nextBoolean()) {
+                current.set(Calendar.DAY_OF_MONTH, Random.nextInt(current.getActualMinimum(Calendar.DAY_OF_MONTH), current.getActualMaximum(Calendar.DAY_OF_MONTH)))
+                events.add(MockEvent(UUID.randomUUID().toString(), current.time))
+            }
         }
-        return events
+        callback.invoke(events)
     }
 
     class MockEvent(override var id: String, override var date: Date) : Event
