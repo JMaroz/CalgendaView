@@ -95,7 +95,7 @@ internal class AgendaListView @JvmOverloads constructor(context: Context, attrs:
         }
         if (item is AgendaDayItem) {
             if (!isAgendaScrollTriggerByCalendar) {
-                adapter.agendaViewHandler?.bindAgendaDayHeader(item, header.tag as RecyclerView.ViewHolder)
+                adapter.agendaViewHandler?.bindAgendaDayHeader(item, emptyList(), header.tag as RecyclerView.ViewHolder)
                 if (isScrollUp) { // when user scroll up, change agenda item scroll action again
                     moveToDate(item.date)
                 }
@@ -170,7 +170,7 @@ internal class AgendaListView @JvmOverloads constructor(context: Context, attrs:
                 itemsIndex.clear()
 
                 agendaDataList.forEach { item ->
-                    items[item.getDateAsString()]?.add(item)
+                    items[item.dateString]?.add(item)
                 }
 
                 var index = 0

@@ -35,7 +35,7 @@ internal class AgendaPageRecyclerAdapter(context: Context) : RecyclerView.Adapte
 
         val dayViewHolder = agendaViewHandler!!.getAgendaDayHeaderHolder(layoutInflater, group)
         group.addView(dayViewHolder.itemView)
-        agendaViewHandler!!.bindAgendaDayHeader(item.dayItem, dayViewHolder)
+        agendaViewHandler!!.bindAgendaDayHeader(item.dayItem, item.events, dayViewHolder)
 
         if (item.events.isEmpty()) {
             val emptyEventViewHolder = agendaViewHandler!!.getAgendaEmptyEventHolder(layoutInflater, group)

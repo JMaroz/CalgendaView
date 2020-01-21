@@ -151,7 +151,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                     it.agendaEvents.clear()
                 }
                 newData.forEach { agenda ->
-                    calendarIndex[agenda.getDateAsString()]?.let {
+                    calendarIndex[agenda.dateString]?.let {
                         calendarItems[it].agendaEvents.add(agenda)
                     }
                 }

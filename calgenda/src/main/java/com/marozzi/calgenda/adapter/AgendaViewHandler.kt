@@ -17,7 +17,7 @@ interface AgendaViewHandler {
 
     fun getAgendaEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder
 
-    fun bindAgendaDayHeader(dayItem: AgendaDayItem, holder: RecyclerView.ViewHolder)
+    fun bindAgendaDayHeader(dayItem: AgendaDayItem, events: List<AgendaEventItem>, holder: RecyclerView.ViewHolder)
 
     fun bindAgendaEmptyEvent(holder: RecyclerView.ViewHolder)
 

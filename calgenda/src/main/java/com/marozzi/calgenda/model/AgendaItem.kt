@@ -11,29 +11,24 @@ interface AgendaBaseItem {
 
     companion object {
         var AGENDA_ITEM_TYPE_DAY = 0
-        var AGENDA_ITEM_TYPE_EMPTY_EVENT = 1
         var AGENDA_ITEM_TYPE_EVENT = 2
     }
 
     val date: Date
     val type: Int
-
-    fun getDateAsString(): String = date.formatDate(CALGENDA_DATE_FORMAT)
+    val dateString:String
 }
 
 data class AgendaDayItem(override val date: Date, var isToday: Boolean) : AgendaBaseItem {
 
     override val type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_DAY
+    override val dateString: String = date.formatDate(CALGENDA_DATE_FORMAT)
 }
-
-//data class AgendaEmptyEventItem(override var date: Date) : AgendaBaseItem {
-//
-//    override var type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EMPTY_EVENT
-//}
 
 data class AgendaEventItem(val event: Event, override val date: Date = event.date, var isFirst: Boolean, var isLast: Boolean) : AgendaBaseItem {
 
     override val type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT
+    override val dateString: String = date.formatDate(CALGENDA_DATE_FORMAT)
 
     // leave equals and hasCode
 
@@ -55,6 +50,6 @@ data class AgendaEventItem(val event: Event, override val date: Date = event.dat
 
 internal data class AgendaPageItem(val dayItem: AgendaDayItem) {
 
-    val events = mutableListOf<AgendaBaseItem>()
+    val events = mutableListOf<AgendaEventItem>()
 
 }

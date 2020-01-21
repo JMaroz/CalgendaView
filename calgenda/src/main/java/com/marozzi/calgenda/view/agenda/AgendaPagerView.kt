@@ -112,7 +112,7 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
                 }
                 //add new events
                 agendaDataList.forEach {
-                    pageItemsIndex[it.getDateAsString()]?.let { index ->
+                    pageItemsIndex[it.dateString]?.let { index ->
                         pageItems[index]?.events?.add(it)
                     }
                 }
