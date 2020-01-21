@@ -1,11 +1,9 @@
 package com.marozzi.calgenda.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.model.AgendaDayItem
-import com.marozzi.calgenda.model.AgendaEmptyEventItem
 import com.marozzi.calgenda.model.AgendaEventItem
 
 /**
@@ -21,7 +19,7 @@ interface AgendaViewHandler {
 
     fun bindAgendaDayHeader(dayItem: AgendaDayItem, holder: RecyclerView.ViewHolder)
 
-    fun bindAgendaEmptyEvent(emptyEvent: AgendaEmptyEventItem, holder: RecyclerView.ViewHolder)
+    fun bindAgendaEmptyEvent(holder: RecyclerView.ViewHolder)
 
     fun bindAgendaEvent(event: AgendaEventItem, holder: RecyclerView.ViewHolder)
 

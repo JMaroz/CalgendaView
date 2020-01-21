@@ -1,6 +1,7 @@
 package com.marozzi.calgenda.test
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.marozzi.calgenda.model.Event
 import com.marozzi.calgenda.view.CalgendaView
@@ -31,11 +32,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onMonthChange(newMonth: Date) {
+                Log.d("MainActivity", "onMonthChange ${newMonth.formatDate("MMMM yyyy")}")
                 toggle_calendar.text = newMonth.formatDate("MMMM yyyy").toUpperCase(Locale.getDefault())
                 AppExecutors.diskIO().execute {
                     mockEvents(newMonth) { events ->
                         AppExecutors.mainThread().execute {
-                            calgenda.addEvents(events, true)
+                            calgenda.addEvents(events, Random.nextBoolean())
                         }
                     }
                 }

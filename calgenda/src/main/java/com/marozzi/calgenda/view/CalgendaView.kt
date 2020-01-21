@@ -31,7 +31,7 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     /**
      * Map where for every day has a list of agenda items
      */
-    private var dataMap: SortedMap<String, MutableSet<AgendaBaseItem>> = Collections.synchronizedSortedMap(TreeMap<String, MutableSet<AgendaBaseItem>>())
+    private var dataMap: SortedMap<String, MutableSet<AgendaEventItem>> = Collections.synchronizedSortedMap(TreeMap<String, MutableSet<AgendaEventItem>>())
 
     var listener: OnCalgendaListener? = null
 
@@ -192,72 +192,53 @@ class CalgendaView @JvmOverloads constructor(context: Context, attrs: AttributeS
     }
 
     fun setEvents(events: List<Event>, moveToCurrentDay: Boolean) {
+        require(isInit()) { "Unable to set events before Calgenda is init" }
         dataMap.values.forEach { it.clear() } // clear all the events for every day
         addEvents(events, moveToCurrentDay)
     }
 
     fun addEvents(events: List<Event>, moveToCurrentDay: Boolean) {
+        require(isInit()) { "Unable to add events before Calgenda is init" }
         AppExecutors.background().execute {
-            events.forEach { event ->
-                val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
-                if (event.date in startDate..endDate) {
-                    dataMap[date] = (dataMap[date] ?: mutableSetOf()).apply {
-                        add(AgendaEventItem(event, isFirst = false, isLast = false))
-                    }
-                }
-            }
-
-            dataMap.entries.forEach {
-                if (it.value.isEmpty()) {
-                    it.value.add(AgendaEmptyEventItem(it.key.getDate(CALGENDA_DATE_FORMAT)!!))
-                } else {
-                    var containsEmptyEvent = false
-                    var containsEvent = false
-                    it.value.forEachIndexed { index, agendaEventItem ->
-                        if (!containsEmptyEvent && agendaEventItem is AgendaEmptyEventItem)
-                            containsEmptyEvent = true
-                        if (!containsEvent && agendaEventItem is AgendaEventItem)
-                            containsEvent = true
-                        if (agendaEventItem is AgendaEventItem) {
-                            agendaEventItem.isFirst = index == 0
-                            agendaEventItem.isLast = index == it.value.size - 1
+            synchronized(dataMap) {
+                events.forEach { event ->
+                    val date = event.date.formatDate(CALGENDA_DATE_FORMAT)
+                    if (event.date in startDate..endDate) {
+                        dataMap[date] = (dataMap[date] ?: mutableSetOf()).apply {
+                            add(AgendaEventItem(event, isFirst = false, isLast = false))
                         }
                     }
-                    if (containsEmptyEvent && containsEvent) { // remove empty event
-                        val each = it.value.iterator()
-                        while (each.hasNext()) {
-                            if (each.next() is AgendaEmptyEventItem) {
-                                each.remove()
+                }
+
+                val allData = mutableListOf<AgendaEventItem>()
+                dataMap.entries.forEach {
+                    it.value.forEachIndexed { index, agendaEventItem ->
+                        agendaEventItem.isFirst = index == 0
+                        agendaEventItem.isLast = index == it.value.size - 1
+                    }
+                    allData.addAll(it.value)
+                }
+
+                AppExecutors.mainThread().execute {
+                    var agendaFinish = false
+                    var calendarFinish = false
+                    fun check() {
+                        if (agendaFinish && calendarFinish && !changedByUserClick && moveToCurrentDay) {
+                            currentDate?.let {
+                                baseAgendaView.moveToDate(it)
+                                calendar_view.scrollToDate(it)
+                                calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
                             }
                         }
                     }
-                }
-            }
-
-            val allData = mutableListOf<AgendaBaseItem>()
-            dataMap.values.map {
-                allData.addAll(it)
-            }
-
-            AppExecutors.mainThread().execute {
-                var agendaFinish = false
-                var calendarFinish = false
-                fun check() {
-                    if (agendaFinish && calendarFinish && !changedByUserClick && moveToCurrentDay) {
-                        currentDate?.let {
-                            baseAgendaView.moveToDate(it)
-                            calendar_view.scrollToDate(it)
-                            calendar_week_headbar_view.setCurrentSelectedDay(it.get(Calendar.DAY_OF_WEEK))
-                        }
+                    baseAgendaView.onDataChange(allData.toList()) {
+                        agendaFinish = true
+                        check()
                     }
-                }
-                baseAgendaView.onDataChange(allData) {
-                    agendaFinish = true
-                    check()
-                }
-                calendar_view.onDataChange(allData) {
-                    calendarFinish = true
-                    check()
+                    calendar_view.onDataChange(allData.toList()) {
+                        calendarFinish = true
+                        check()
+                    }
                 }
             }
         }

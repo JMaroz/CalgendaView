@@ -28,7 +28,7 @@ data class CalendarItem(
     /**
      * List of agenda event item set for the date
      */
-    val agendaEvents: MutableSet<AgendaBaseItem> = mutableSetOf()
+    val agendaEvents: MutableSet<AgendaEventItem> = mutableSetOf()
 
     fun getDateAsString(): String = date.formatDate(CALGENDA_DATE_FORMAT)
 }

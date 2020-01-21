@@ -13,13 +13,17 @@ import com.marozzi.calgenda.adapter.AgendaListRecyclerAdapter
 import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.model.AgendaBaseItem
 import com.marozzi.calgenda.model.AgendaDayItem
-import com.marozzi.calgenda.model.AgendaEmptyEventItem
-import com.marozzi.calgenda.util.*
+import com.marozzi.calgenda.model.AgendaEventItem
 import com.marozzi.calgenda.util.AppExecutors
 import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT
 import com.marozzi.calgenda.util.CALGENDA_DATE_FORMAT_MONTH
 import com.marozzi.calgenda.util.formatDate
 import java.util.*
+import kotlin.collections.List
+import kotlin.collections.MutableList
+import kotlin.collections.forEach
+import kotlin.collections.mutableListOf
+import kotlin.collections.set
 
 /**
  * Created by amarozzi on 2019-11-08
@@ -152,32 +156,34 @@ internal class AgendaListView @JvmOverloads constructor(context: Context, attrs:
         }
     }
 
-    override fun onDataChange(agendaDataList: List<AgendaBaseItem>, callback: () -> Unit) {
+    override fun onDataChange(agendaDataList: List<AgendaEventItem>, callback: () -> Unit) {
         AppExecutors.background().execute {
-            items.forEach {
-                val each = it.value.iterator()
-                while (each.hasNext()) {
-                    if (each.next() !is AgendaDayItem) {
-                        each.remove()
+            synchronized(items) {
+                items.forEach {
+                    val each = it.value.iterator()
+                    while (each.hasNext()) {
+                        if (each.next() !is AgendaDayItem) {
+                            each.remove()
+                        }
                     }
                 }
-            }
-            itemsIndex.clear()
+                itemsIndex.clear()
 
-            agendaDataList.forEach { item ->
-                items[item.getDateAsString()]?.add(item)
-            }
+                agendaDataList.forEach { item ->
+                    items[item.getDateAsString()]?.add(item)
+                }
 
-            var index = 0
-            val addData = mutableListOf<AgendaBaseItem>()
-            items.forEach {
-                itemsIndex[it.key] = index
-                index += it.value.size
-                addData.addAll(it.value)
-            }
-            AppExecutors.mainThread().execute {
-                recyclerView.post { adapter.updateAgendaList(addData) }
-                callback.invoke()
+                var index = 0
+                val addData = mutableListOf<AgendaBaseItem>()
+                items.forEach {
+                    itemsIndex[it.key] = index
+                    index += it.value.size
+                    addData.addAll(it.value)
+                }
+                AppExecutors.mainThread().execute {
+                    recyclerView.post { adapter.updateAgendaList(addData) }
+                    callback.invoke()
+                }
             }
         }
     }

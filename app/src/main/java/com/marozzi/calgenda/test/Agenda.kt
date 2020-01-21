@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.adapter.AgendaViewHandler
 import com.marozzi.calgenda.model.AgendaDayItem
-import com.marozzi.calgenda.model.AgendaEmptyEventItem
 import com.marozzi.calgenda.model.AgendaEventItem
 import kotlinx.android.synthetic.main.calgenda_item_date_header.view.*
 import kotlinx.android.synthetic.main.calgenda_item_event.view.*
@@ -40,7 +39,7 @@ class AgendaViewHandlerImp : AgendaViewHandler {
         }
     }
 
-    override fun bindAgendaEmptyEvent(emptyEvent: AgendaEmptyEventItem, holder: RecyclerView.ViewHolder) {
+    override fun bindAgendaEmptyEvent(holder: RecyclerView.ViewHolder) {
         val viewHolder = holder as AgendaEmptyEventHolderImp
         viewHolder.itemView.setOnClickListener {
             Toast.makeText(it.context, "No event in this day", Toast.LENGTH_SHORT).show()

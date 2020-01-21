@@ -26,10 +26,10 @@ data class AgendaDayItem(override val date: Date, var isToday: Boolean) : Agenda
     override val type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_DAY
 }
 
-data class AgendaEmptyEventItem(override var date: Date) : AgendaBaseItem {
-
-    override var type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EMPTY_EVENT
-}
+//data class AgendaEmptyEventItem(override var date: Date) : AgendaBaseItem {
+//
+//    override var type: Int = AgendaBaseItem.AGENDA_ITEM_TYPE_EMPTY_EVENT
+//}
 
 data class AgendaEventItem(val event: Event, override val date: Date = event.date, var isFirst: Boolean, var isLast: Boolean) : AgendaBaseItem {
 

@@ -37,18 +37,15 @@ internal class AgendaPageRecyclerAdapter(context: Context) : RecyclerView.Adapte
         group.addView(dayViewHolder.itemView)
         agendaViewHandler!!.bindAgendaDayHeader(item.dayItem, dayViewHolder)
 
-        item.events.forEach { baseItem ->
-            when (baseItem.type) {
-                AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT -> {
-                    val eventViewHolder = agendaViewHandler!!.getAgendaEventHolder(layoutInflater, group)
-                    group.addView(eventViewHolder.itemView)
-                    agendaViewHandler!!.bindAgendaEvent(baseItem as AgendaEventItem, eventViewHolder)
-                }
-                AgendaBaseItem.AGENDA_ITEM_TYPE_EMPTY_EVENT -> {
-                    val emptyEventViewHolder = agendaViewHandler!!.getAgendaEmptyEventHolder(layoutInflater, group)
-                    group.addView(emptyEventViewHolder.itemView)
-                    agendaViewHandler!!.bindAgendaEmptyEvent(baseItem as AgendaEmptyEventItem, emptyEventViewHolder)
-                }
+        if (item.events.isEmpty()) {
+            val emptyEventViewHolder = agendaViewHandler!!.getAgendaEmptyEventHolder(layoutInflater, group)
+            group.addView(emptyEventViewHolder.itemView)
+            agendaViewHandler!!.bindAgendaEmptyEvent(emptyEventViewHolder)
+        } else {
+            item.events.forEach { baseItem ->
+                val eventViewHolder = agendaViewHandler!!.getAgendaEventHolder(layoutInflater, group)
+                group.addView(eventViewHolder.itemView)
+                agendaViewHandler!!.bindAgendaEvent(baseItem as AgendaEventItem, eventViewHolder)
             }
         }
     }
@@ -61,11 +58,8 @@ internal class AgendaPageRecyclerAdapter(context: Context) : RecyclerView.Adapte
      * update list
      */
     fun updateAgendaList(items: List<AgendaPageItem>) {
-        val diffCallback = MyDiffCallback(agendaItemList, items)
-        val diffResult = DiffUtil.calculateDiff(diffCallback)
         this.agendaItemList = items
-        diffResult.dispatchUpdatesTo(this)
-        //        notifyDataSetChanged()
+        notifyDataSetChanged()
     }
 
     private class AgendaPageViewHolder(context: Context) : RecyclerView.ViewHolder(NestedScrollView(context).apply {
@@ -75,22 +69,4 @@ internal class AgendaPageRecyclerAdapter(context: Context) : RecyclerView.Adapte
             orientation = LinearLayout.VERTICAL
         })
     })
-
-    private class MyDiffCallback(private val oldList: List<AgendaPageItem>, private val newList: List<AgendaPageItem>) : DiffUtil.Callback() {
-
-        override fun getOldListSize(): Int = oldList.size
-
-        override fun getNewListSize(): Int = newList.size
-
-        override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-            return oldList[oldItemPosition].dayItem.getDateAsString() === newList[newItemPosition].dayItem.getDateAsString()
-        }
-
-        override fun areContentsTheSame(oldPosition: Int, newPosition: Int): Boolean {
-            val name = oldList[oldPosition]
-            val name1 = newList[newPosition]
-
-            return name.events == name1.events
-        }
-    }
 }

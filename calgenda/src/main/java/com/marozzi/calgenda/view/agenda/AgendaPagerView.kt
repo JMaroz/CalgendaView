@@ -2,6 +2,7 @@ package com.marozzi.calgenda.view.agenda
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.ViewGroup
 import androidx.viewpager2.widget.ViewPager2
 import com.marozzi.calgenda.adapter.AgendaPageRecyclerAdapter
@@ -23,7 +24,7 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
     private val adapter: AgendaPageRecyclerAdapter
 
     private val pageItems = Collections.synchronizedList(mutableListOf<AgendaPageItem>())
-    private val pageItemsIndex = Collections.synchronizedMap(HashMap<String, Int>())
+    private val pageItemsIndex = Collections.synchronizedMap(TreeMap<String, Int>())
 
     private var currentMoth: String = ""
 
@@ -57,9 +58,9 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
 
     override fun moveToDate(date: Date) {
         val dateFormat = date.formatDate(CALGENDA_DATE_FORMAT)
-        val pos = pageItemsIndex[dateFormat] ?: -1
-        viewPager.post {
-            viewPager.setCurrentItem(pos, false)
+        Log.d("AgendaPagerView", dateFormat)
+        pageItemsIndex[dateFormat]?.let {
+            viewPager.post { viewPager.setCurrentItem(it, false) }
         }
     }
 
@@ -90,9 +91,7 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
             }
             var index = 0
             while (startDateSanitized <= endDateSanitized) {
-                pageItems.add(AgendaPageItem(AgendaDayItem(startDateSanitized.time, startDateSanitized == today))/*.apply {
-                    this.events.add(AgendaEmptyEventItem(startDateSanitized.time))
-                }*/)
+                pageItems.add(AgendaPageItem(AgendaDayItem(startDateSanitized.time, startDateSanitized == today)))
                 pageItemsIndex[startDateSanitized.time.formatDate(CALGENDA_DATE_FORMAT)] = index++
                 startDateSanitized.add(Calendar.DAY_OF_MONTH, 1)
             }
@@ -104,7 +103,7 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
         adapter.agendaViewHandler = agendaViewHandler
     }
 
-    override fun onDataChange(agendaDataList: List<AgendaBaseItem>, callback: () -> Unit) {
+    override fun onDataChange(agendaDataList: List<AgendaEventItem>, callback: () -> Unit) {
         AppExecutors.background().execute {
             synchronized(pageItems) {
                 //delete old events
@@ -113,16 +112,14 @@ internal class AgendaPagerView @JvmOverloads constructor(context: Context, attrs
                 }
                 //add new events
                 agendaDataList.forEach {
-                    if (it is AgendaEmptyEventItem || it is AgendaEventItem) {
-                        pageItemsIndex[it.getDateAsString()]?.let { index ->
-                            pageItems[index]?.events?.add(it)
-                        }
+                    pageItemsIndex[it.getDateAsString()]?.let { index ->
+                        pageItems[index]?.events?.add(it)
                     }
                 }
-            }
-            AppExecutors.mainThread().execute {
-                post { adapter.updateAgendaList(pageItems) }
-                callback.invoke()
+                AppExecutors.mainThread().execute {
+                    viewPager.post { adapter.updateAgendaList(pageItems) }
+                    callback.invoke()
+                }
             }
         }
     }

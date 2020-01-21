@@ -4,7 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import com.marozzi.calgenda.adapter.AgendaViewHandler
-import com.marozzi.calgenda.model.AgendaBaseItem
+import com.marozzi.calgenda.model.AgendaEventItem
 import java.util.*
 
 /**
@@ -20,7 +20,7 @@ internal abstract class BaseAgendaView @JvmOverloads constructor(context: Contex
 
     abstract fun moveToDate(date: Date)
 
-    abstract fun onDataChange(agendaDataList: List<AgendaBaseItem>, callback: () -> Unit)
+    abstract fun onDataChange(agendaDataList: List<AgendaEventItem>, callback: () -> Unit)
 
     interface OnAgendaViewListener {
 

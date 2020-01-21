@@ -2,14 +2,10 @@ package com.marozzi.calgenda.adapter
 
 import android.content.Context
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import androidx.recyclerview.widget.RecyclerView
-
 import com.marozzi.calgenda.model.AgendaBaseItem
 import com.marozzi.calgenda.model.AgendaDayItem
-import com.marozzi.calgenda.model.AgendaEmptyEventItem
 import com.marozzi.calgenda.model.AgendaEventItem
 
 /**
@@ -39,7 +35,7 @@ internal class AgendaListRecyclerAdapter(context: Context) : RecyclerView.Adapte
         when (item.type) {
             AgendaBaseItem.AGENDA_ITEM_TYPE_DAY -> agendaViewHandler!!.bindAgendaDayHeader(item as AgendaDayItem, viewHolder)
             AgendaBaseItem.AGENDA_ITEM_TYPE_EVENT -> agendaViewHandler!!.bindAgendaEvent(item as AgendaEventItem, viewHolder)
-            else -> agendaViewHandler!!.bindAgendaEmptyEvent(item as AgendaEmptyEventItem, viewHolder)
+            else -> agendaViewHandler!!.bindAgendaEmptyEvent(viewHolder)
         }
     }
 

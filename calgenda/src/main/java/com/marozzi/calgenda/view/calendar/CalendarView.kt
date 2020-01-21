@@ -1,9 +1,12 @@
 package com.marozzi.calgenda.view.calendar
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.res.Configuration
 import android.util.AttributeSet
+import android.util.Log
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.recyclerview.widget.GridLayoutManager
@@ -11,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.marozzi.calgenda.adapter.CalendarGridViewAdapter
 import com.marozzi.calgenda.adapter.CalendarViewHandler
 import com.marozzi.calgenda.model.AgendaBaseItem
+import com.marozzi.calgenda.model.AgendaEventItem
 import com.marozzi.calgenda.model.CalendarItem
 import com.marozzi.calgenda.util.*
 import java.util.*
@@ -27,6 +31,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     private val layoutManager: GridLayoutManager = GridLayoutManager(context, 7)
     private val adapter: CalendarGridViewAdapter = CalendarGridViewAdapter(context) {
         listener?.onCalendarItemSelected(it)
+        dateSelected = it.date
     }
 
     private val cellItemHeight: Int = context.resources.displayMetrics.widthPixels / 7
@@ -35,10 +40,11 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     private val calendarMinHeight: Int = cellItemHeight * calendarMinRow
     private val calendarMaxHeight: Int = cellItemHeight * calendarMaxRow
 
-    private var currentMonth: String = ""
     private var calendarIndex = Collections.synchronizedSortedMap(TreeMap<String, Int>())
     private var calendarItems = Collections.synchronizedList(mutableListOf<CalendarItem>())
 
+    private var dateSelected: Date? = null
+    private var currentMonth: String = ""
     var status = CalendarViewStatus.COLLAPSE
         private set
 
@@ -139,7 +145,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
         }
     }
 
-    fun onDataChange(newData: List<AgendaBaseItem>, callback: () -> Unit) {
+    fun onDataChange(newData: List<AgendaEventItem>, callback: () -> Unit) {
         AppExecutors.background().execute {
             synchronized(calendarItems) {
                 calendarItems.forEach {
@@ -151,7 +157,7 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                     }
                 }
                 AppExecutors.mainThread().execute {
-                    post { adapter.setItems(calendarItems) }
+                    recyclerView.post { adapter.setItems(calendarItems) }
                     callback.invoke()
                 }
             }
@@ -175,7 +181,13 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                 layoutParams.height = valueAnimator.animatedValue as Int
                 recyclerView.layoutParams = layoutParams
             }
-            //FIXME when finish listener move to select item            addListener()
+            addListener(object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator?) {
+                    dateSelected?.let {
+                        scrollToDate(it)
+                    }
+                }
+            })
             duration = 500
             interpolator = AccelerateDecelerateInterpolator()
             start()
@@ -188,7 +200,11 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
     }
 
     fun scrollToDate(date: Date) {
-        scrollToDateByPosition(calendarIndex[date.formatDate(CALGENDA_DATE_FORMAT)] ?: 0)
+        val dateString = date.formatDate(CALGENDA_DATE_FORMAT)
+        Log.d("CalendarView", dateString)
+        calendarIndex[dateString]?.let {
+            scrollToDateByPosition(it)
+        }
     }
 
     fun getFirstCalendarItemVisible(): CalendarItem? = adapter.getItem(layoutManager.findFirstVisibleItemPosition())

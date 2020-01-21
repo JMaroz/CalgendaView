@@ -63,9 +63,7 @@ class CalendarViewHandlerImp : CalendarViewHandler {
             viewHolder.events.alpha = .6f
         }
 
-        val events = if (item.agendaEvents.isEmpty()) false else item.agendaEvents.find { it is AgendaEventItem } != null
-
-        if (!events) {
+        if (item.agendaEvents.isEmpty()) {
             viewHolder.events.visibility = View.GONE
         } else {
             viewHolder.events.visibility = View.VISIBLE
