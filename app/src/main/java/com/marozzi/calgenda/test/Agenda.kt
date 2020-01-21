@@ -18,24 +18,19 @@ import java.util.*
  */
 class AgendaViewHandlerImp : AgendaViewHandler {
 
-    override fun getAgendaDayHeaderHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder = AgendaDayHeaderHolderImp(
-        layoutInflater.inflate(R.layout.calgenda_item_date_header, parent, false))
+    override fun getAgendaDayHeaderHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder = AgendaDayHeaderHolderImp(layoutInflater.inflate(R.layout.calgenda_item_date_header, parent, false))
 
-    override fun getAgendaEmptyEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder = AgendaEmptyEventHolderImp(
-        layoutInflater.inflate(R.layout.calgenda_item_empty_event, parent, false))
+    override fun getAgendaEmptyEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder = AgendaEmptyEventHolderImp(layoutInflater.inflate(R.layout.calgenda_item_empty_event, parent, false))
 
-    override fun getAgendaEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder = AgendaEventHolderImp(
-        layoutInflater.inflate(R.layout.calgenda_item_event, parent, false))
+    override fun getAgendaEventHolder(layoutInflater: LayoutInflater, parent: ViewGroup): RecyclerView.ViewHolder = AgendaEventHolderImp(layoutInflater.inflate(R.layout.calgenda_item_event, parent, false))
 
-    override fun bindAgendaDayHeader(dayItem: AgendaDayItem, holder: RecyclerView.ViewHolder) {
+    override fun bindAgendaDayHeader(dayItem: AgendaDayItem, events: List<AgendaEventItem>, holder: RecyclerView.ViewHolder) {
         val viewHolder = holder as AgendaDayHeaderHolderImp
 
-        viewHolder.date.text = dayItem.date.formatDate("EEE, dd MMM yyyy")
-            .toUpperCase(Locale.getDefault())
+        viewHolder.date.text = dayItem.date.formatDate("EEE, dd MMM yyyy").toUpperCase(Locale.getDefault())
 
         viewHolder.itemView.setOnClickListener {
-            Toast.makeText(it.context, dayItem.date.formatDate("EEE, MMM dd"), Toast.LENGTH_SHORT)
-                .show()
+            Toast.makeText(it.context, dayItem.date.formatDate("EEE, MMM dd"), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -68,6 +63,6 @@ class AgendaEmptyEventHolderImp(itemView: View) : RecyclerView.ViewHolder(itemVi
 
 class AgendaEventHolderImp(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    val event : TextView = itemView.event
-    val divider : View = itemView.divider
+    val event: TextView = itemView.event
+    val divider: View = itemView.divider
 }

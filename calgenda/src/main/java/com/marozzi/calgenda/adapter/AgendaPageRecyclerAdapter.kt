@@ -45,7 +45,7 @@ internal class AgendaPageRecyclerAdapter(context: Context) : RecyclerView.Adapte
             item.events.forEach { baseItem ->
                 val eventViewHolder = agendaViewHandler!!.getAgendaEventHolder(layoutInflater, group)
                 group.addView(eventViewHolder.itemView)
-                agendaViewHandler!!.bindAgendaEvent(baseItem as AgendaEventItem, eventViewHolder)
+                agendaViewHandler!!.bindAgendaEvent(baseItem, eventViewHolder)
             }
         }
     }
