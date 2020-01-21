@@ -127,7 +127,6 @@ internal class CalendarView @JvmOverloads constructor(context: Context, attrs: A
                 set(Calendar.MILLISECOND, 0)
             }
             val today = Calendar.getInstance().apply {
-                time = startDate
                 set(Calendar.HOUR_OF_DAY, 0)
                 set(Calendar.MINUTE, 0)
                 set(Calendar.SECOND, 0)
